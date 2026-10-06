@@ -1,0 +1,21 @@
+RewriteEngine On
+RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Jangan rewrite asset statis & file nyata
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Semua rute lain ke front controller
+RewriteRule ^ index.php [L,QSA]
+
+# Keamanan: tolak akses langsung
+<FilesMatch "^(\.env|install\.php)$">
+  Require all denied
+</FilesMatch>
+<Files "config.php">
+  Require all denied
+</Files>
+RedirectMatch 403 ^(.*/)?storage/.*$
+RedirectMatch 403 ^(.*/)?tests/.*$
+RedirectMatch 403 ^(.*/)?config/.*$

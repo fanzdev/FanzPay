@@ -1,0 +1,1 @@
+<div class="panel"><h3>Akses ditolak</h3><p style="color:var(--mut)">Role Anda tidak memiliki permission untuk halaman ini. Hubungi super admin.</p><a class="btn btn-ghost" href="<?= url('admin') ?>">Kembali</a></div>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FanzPay" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#F3F5F9</item>
+        <item name="android:statusBarColor">#0B1526</item>
+    </style>
+</resources>
