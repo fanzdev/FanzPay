@@ -46,7 +46,7 @@ $items = [
     <header class="topbar">
       <span class="top-title"><?= e($title ?? '') ?></span>
       <div class="top-act">
-        <button class="theme-toggle" data-theme-toggle aria-label="Mode gelap/terang" style="width:40px;height:40px"><span data-theme-icon>🌙</span></button>
+        <button class="theme-toggle" data-theme-toggle aria-label="Mode gelap/terang" style="width:40px;height:40px"><span data-theme-icon><?= icon('moon', 18) ?></span></button>
         <a class="icon-btn" href="<?= url('notifikasi') ?>" aria-label="Notifikasi"><?= icon('bell') ?><?php if (($unread ?? 0) > 0): ?><i class="dot"><?= (int)$unread > 9 ? '9+' : (int)$unread ?></i><?php endif; ?></a>
         <a class="me" href="<?= url('profil') ?>" aria-label="Profil"><span><?= e(mb_substr($user['name'] ?? 'U', 0, 1)) ?></span></a>
       </div>

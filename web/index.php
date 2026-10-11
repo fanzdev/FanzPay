@@ -9,6 +9,20 @@ declare(strict_types=1);
 require __DIR__ . '/config/config.php';
 require __DIR__ . '/app/Core/helpers.php';
 
+// PHP built-in server: layani file statis langsung (Apache sudah via .htaccess).
+if (PHP_SAPI === 'cli-server') {
+    $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+    $static = __DIR__ . $reqPath;
+    if ($reqPath !== '/' && is_file($static) && str_starts_with(realpath($static) ?: '', realpath(__DIR__) ?: __DIR__)) {
+        $ext = strtolower(pathinfo($static, PATHINFO_EXTENSION));
+        $mime = ['css' => 'text/css', 'js' => 'text/javascript', 'webp' => 'image/webp', 'png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'svg' => 'image/svg+xml', 'xml' => 'application/xml', 'txt' => 'text/plain', 'apk' => 'application/vnd.android.package-archive'][$ext] ?? 'application/octet-stream';
+        header('Content-Type: ' . $mime);
+        header('Cache-Control: public, max-age=3600');
+        readfile($static);
+        exit;
+    }
+}
+
 spl_autoload_register(function (string $class): void {
     if (!str_starts_with($class, 'App\\')) return;
     $file = __DIR__ . '/app/' . str_replace('\\', '/', substr($class, 4)) . '.php';
@@ -71,6 +85,15 @@ $router = new Router();
 
 // Publik
 $router->get('/', ['WebController', 'landing']);
+$router->get('/layanan', ['WebController', 'layanan']);
+$router->get('/cara-kerja', ['WebController', 'caraKerja']);
+$router->get('/keunggulan', ['WebController', 'keunggulan']);
+$router->get('/harga', ['WebController', 'harga']);
+$router->get('/faq', ['WebController', 'faq']);
+$router->get('/bantuan', ['WebController', 'bantuan']);
+$router->get('/syarat-ketentuan', ['WebController', 'syarat']);
+$router->get('/kebijakan-privasi', ['WebController', 'privasi']);
+$router->get('/kebijakan-refund', ['WebController', 'refund']);
 $router->get('/pay/{id}', ['WebController', 'pay']);
 $router->get('/login', ['AuthController', 'login']);
 $router->post('/login', ['AuthController', 'doLogin']);

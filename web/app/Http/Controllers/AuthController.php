@@ -101,19 +101,24 @@ final class AuthController {
     public function setupSuper(): void {
         if (Auth::check()) redirect('');
         if (self::superAdminExists()) {
-            flash('error', 'Setup Super Admin sudah ditutup. Masuk lewat halaman login.');
-            redirect('login');
+            // Super admin hanya boleh SATU akun: URL ini mati total setelah ada.
+            Logger::audit(null, null, 'auth.setup_super.blocked', 'users', null, 'fail', ['ip' => client_ip()]);
+            http_response_code(404);
+            View::render('errors/404', ['title' => 'Tidak ditemukan'], 'public');
+            return;
         }
         View::render('auth/setup-super', ['title' => 'Setup Super Admin — FanzPay', 'error' => flash('error')], 'auth');
     }
 
     public function doSetupSuper(): void {
-        if (!CSRF::check($_POST['_csrf'] ?? null)) { flash('error', 'Sesi kedaluwarsa. Coba lagi.'); redirect('setup-super'); }
+        // Kunci utama: hanya 1 super admin — cek sebelum validasi lain agar selalu 404 saat terkunci.
         if (self::superAdminExists()) {
             Logger::audit(null, null, 'auth.setup_super.blocked', 'users', null, 'fail', ['ip' => client_ip()]);
-            flash('error', 'Setup Super Admin sudah ditutup.');
-            redirect('login');
+            http_response_code(404);
+            View::render('errors/404', ['title' => 'Tidak ditemukan'], 'public');
+            return;
         }
+        if (!CSRF::check($_POST['_csrf'] ?? null)) { flash('error', 'Sesi kedaluwarsa. Coba lagi.'); redirect('setup-super'); }
         $rl = RateLimiter::hit('setup-super:' . client_ip(), 5, 600);
         if (!$rl['allowed']) { flash('error', 'Terlalu banyak percobaan. Coba lagi nanti.'); redirect('setup-super'); }
         [$clean, $errors] = Validator::validate($_POST, [

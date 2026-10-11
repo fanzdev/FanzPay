@@ -2,11 +2,11 @@
 require_once fp_base_path('views/partials/icons.php');
 /** @var array $user */ /** @var int $balance */ /** @var array $recent */ /** @var array $featured */ /** @var bool $sandbox */
 ?>
-<?php if ($sandbox): ?><div class="sandbox-note"><?= icon('zap', 16) ?> Mode sandbox aktif — eksplorasi bebas, belum pakai uang asli. Gaspol buat belajar.</div><?php endif; ?>
-<?php if (!($has_pin ?? true)): ?><div class="alert err">Satu langkah lagi, bestie 🔐 — buat <a href="<?= url('pin') ?>"><strong>PIN 6 digit</strong></a> untuk mengaktifkan transfer, withdraw &amp; pembelian.</div><?php endif; ?>
+<?php if ($sandbox): ?><div class="sandbox-note"><?= icon('zap', 16) ?> Mode sandbox aktif — cocok untuk uji coba, belum memakai dana sebenarnya.</div><?php endif; ?>
+<?php if (!($has_pin ?? true)): ?><div class="alert err">Satu langkah lagi — buat <a href="<?= url('pin') ?>"><strong>PIN 6 digit</strong></a> untuk mengaktifkan transfer, withdraw &amp; pembelian.</div><?php endif; ?>
 
 <section class="bal" aria-label="Saldo">
-  <div class="lbl">Halo, <?= e($user['name']) ?> 💜 — Saldo FanzPay kamu</div>
+  <div class="lbl">Halo, <?= e($user['name']) ?> — Saldo FanzPay kamu</div>
   <div class="amt"><?= rupiah($balance) ?></div>
   <div class="row">
     <a class="qa" href="<?= url('deposit') ?>"><?= icon('plus', 18) ?>Deposit</a>

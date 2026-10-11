@@ -26,10 +26,13 @@ final class Validator {
         return [$clean, $errors];
     }
 
+    /** Normalisasi ke bentuk kanonis internasional: +62xxxxxxxxxx. */
     public static function normalizePhone(string $raw): string {
         $p = preg_replace('/[\s\-\.]/', '', trim($raw));
-        if (str_starts_with($p, '+62')) $p = '0' . substr($p, 3);
-        elseif (str_starts_with($p, '62')) $p = '0' . substr($p, 2);
-        return $p;
+        $p = preg_replace('/^\+/', '', (string)$p);
+        while (str_starts_with($p, '62')) $p = substr($p, 2);
+        while (str_starts_with($p, '0')) $p = substr($p, 1);
+        $p = preg_replace('/[^\d]/', '', (string)$p);
+        return '+62' . $p;
     }
 }

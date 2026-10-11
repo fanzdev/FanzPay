@@ -12,7 +12,10 @@
     root.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
     try { localStorage.setItem('fanzpay-theme', t === 'dark' ? 'dark' : 'light'); } catch (e) {}
     document.querySelectorAll('[data-theme-icon]').forEach(function (el) {
-      el.textContent = t === 'dark' ? '☀️' : '🌙';
+      var isDark = t === 'dark';
+      el.innerHTML = isDark
+        ? '<svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>'
+        : '<svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg>';
     });
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', t === 'dark' ? '#070C1A' : '#F4F6FB');
@@ -24,7 +27,7 @@
     ev.preventDefault();
     var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     applyTheme(next);
-    toast(next === 'dark' ? 'Mode gelap aktif — mata aman, gaya tetap.' : 'Mode terang aktif — bersih dan fokus.');
+    toast(next === 'dark' ? 'Mode gelap aktif.' : 'Mode terang aktif.');
   });
 
   function toast(msg) {
@@ -87,14 +90,150 @@
     document.querySelectorAll('[data-count]').forEach(function (el) { cio.observe(el); });
   } catch (e) {}
 
-  /* ---------- Password peek ---------- */
+  /* ---------- FAQ: satu terbuka dalam satu waktu (hemat ruang vertikal) ---------- */
+  document.querySelectorAll('.faq').forEach(function (wrap) {
+    wrap.querySelectorAll('details').forEach(function (d) {
+      d.addEventListener('toggle', function () {
+        if (!d.open) return;
+        wrap.querySelectorAll('details').forEach(function (o) { if (o !== d && o.open) o.open = false; });
+      });
+    });
+  });
+
+  /* ---------- Password peek: ikon mata di dalam input ---------- */
+  var EYE = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>';
+  var EYEOFF = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.6 5.2A16.4 16.4 0 0 1 12 5.5c6.5 0 10 6.5 10 6.5a17.6 17.6 0 0 1-3.1 3.8M6.6 6.6A16.8 16.8 0 0 0 2 12s3.5 6.5 10 6.5c1.4 0 2.7-.3 3.9-.8"/><path d="m3 3 18 18"/></svg>';
   document.querySelectorAll('[data-peek]').forEach(function (btn) {
+    if (!btn.dataset.eyeInit) { btn.innerHTML = EYE; btn.dataset.eyeInit = '1'; }
+    btn.setAttribute('aria-label', 'Tampilkan kata sandi');
     btn.addEventListener('click', function () {
       var inp = document.querySelector(btn.getAttribute('data-peek'));
       if (!inp) return;
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-      btn.textContent = inp.type === 'password' ? 'Lihat' : 'Sembunyikan';
+      var show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      btn.innerHTML = show ? EYEOFF : EYE;
+      btn.classList.toggle('on', show);
+      btn.setAttribute('aria-label', show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+      inp.focus({ preventScroll: true });
     });
+  });
+
+  /* ---------- Meter kekuatan kata sandi ---------- */
+  document.querySelectorAll('[data-strength]').forEach(function (inp) {
+    var meter = document.querySelector(inp.getAttribute('data-strength'));
+    if (!meter) return;
+    var bars = meter.querySelectorAll('i');
+    var label = meter.querySelector('[data-slabel]');
+    var names = ['Isi kata sandi', 'Lemah', 'Cukup', 'Kuat', 'Sangat kuat'];
+    function score(v) {
+      if (!v) return 0;
+      var s = 0;
+      if (v.length >= 8) s++;
+      if (v.length >= 12) s++;
+      if (/[a-z]/.test(v) && /[A-Z]/.test(v)) s++;
+      if (/\d/.test(v)) s++;
+      if (/[^A-Za-z0-9]/.test(v)) s++;
+      return Math.max(1, Math.min(4, s));
+    }
+    function paint() {
+      var lv = score(inp.value);
+      meter.className = meter.className.replace(/\blv\d\b/g, '').trim() + ' lv' + lv;
+      bars.forEach(function (b, i) { b.classList.toggle('f', i < lv); });
+      if (label) label.textContent = names[lv];
+    }
+    inp.addEventListener('input', paint);
+    paint();
+  });
+
+  /* ---------- Input HP: chip +62 + auto-strip awalan ---------- */
+  function stripID(v) {
+    v = (v || '').replace(/[^\d]/g, '');
+    while (/^62/.test(v)) v = v.slice(2);
+    while (/^0/.test(v)) v = v.slice(1);
+    return v.slice(0, 14);
+  }
+  document.querySelectorAll('.phone-wrap input').forEach(function (inp) {
+    inp.value = stripID(inp.value);
+    inp.setAttribute('placeholder', '812 xxxx xxxx');
+    inp.addEventListener('input', function () {
+      inp.value = stripID(inp.value);
+      try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {}
+    });
+  });
+  // Saat submit: kirim bentuk lengkap +62xxxxxxxxxx ke server.
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target;
+    if (!f || !f.querySelector) return;
+    f.querySelectorAll('.phone-wrap input[name]').forEach(function (inp) {
+      var d = stripID(inp.value);
+      if (d !== '') inp.value = '+62' + d;
+    });
+  }, true);
+
+  /* ---------- Wizard multi-langkah (mis. registrasi) ---------- */
+  document.querySelectorAll('[data-wizard]').forEach(function (w) {
+    var panels = Array.prototype.slice.call(w.querySelectorAll('[data-wpanel]'));
+    var steps = Array.prototype.slice.call(w.querySelectorAll('[data-wstep]'));
+    var cur = 0;
+    function paint() {
+      panels.forEach(function (p, i) { p.classList.toggle('on', i === cur); });
+      steps.forEach(function (s, i) {
+        s.classList.toggle('on', i === cur);
+        s.classList.toggle('done', i < cur);
+      });
+      var first = panels[cur] && panels[cur].querySelector('input');
+      if (first) { try { first.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    function validPanel(p) {
+      var ok = true, firstBad = null;
+      p.querySelectorAll('[data-req]').forEach(function (el) {
+        var v = (el.value || '').trim(), bad = '';
+        el.closest('.field').classList.remove('invalid');
+        if (v === '') bad = 'Wajib diisi.';
+        else if (el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) bad = 'Format email tidak valid.';
+        else if (el.dataset.min && v.length < parseInt(el.dataset.min, 10)) bad = 'Minimal ' + el.dataset.min + ' karakter.';
+        else if (el.dataset.match) {
+          var other = w.querySelector('[name="' + el.dataset.match + '"]');
+          if (other && v !== other.value) bad = 'Tidak sama dengan kata sandi.';
+        }
+        else if (el.dataset.phone) {
+          var nv = (function (x) { x = x.replace(/[^\d]/g, ''); while (/^62/.test(x)) x = x.slice(2); while (/^0/.test(x)) x = x.slice(1); return x; })(v);
+          if (!/^8\d{7,11}$/.test(nv)) bad = 'Nomor HP tidak valid.';
+        }
+        var err = el.closest('.field').querySelector('[data-werr]');
+        if (bad) {
+          ok = false;
+          el.closest('.field').classList.add('invalid');
+          if (err) { err.textContent = bad; err.style.display = 'block'; }
+          if (!firstBad) firstBad = el;
+        } else if (err) { err.style.display = 'none'; }
+      });
+      if (firstBad) { try { firstBad.focus({ preventScroll: true }); } catch (e) {} }
+      return ok;
+    }
+    w.querySelectorAll('[data-wnext]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!validPanel(panels[cur])) return;
+        if (cur < panels.length - 1) { cur++; paint(); fillReview(); }
+      });
+    });
+    w.querySelectorAll('[data-wback]').forEach(function (b) {
+      b.addEventListener('click', function () { if (cur > 0) { cur--; paint(); } });
+    });
+    w.querySelectorAll('[data-wgoto]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = parseInt(b.getAttribute('data-wgoto'), 10);
+        if (!isNaN(i) && i >= 0 && i < panels.length) { cur = i; paint(); }
+      });
+    });
+    function fillReview() {
+      w.querySelectorAll('[data-review]').forEach(function (el) {
+        var src = w.querySelector('[name="' + el.getAttribute('data-review') + '"]');
+        if (src) el.textContent = src.type === 'password' ? '••••••••' : (src.value || '—');
+      });
+    }
+    w.addEventListener('input', function () { fillReview(); });
+    paint();
   });
 
   // Idempotency key per form (hindari double-submit / double-click)

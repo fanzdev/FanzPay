@@ -59,11 +59,11 @@ $menu = [
   <div class="main">
     <header class="topbar">
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="theme-toggle" onclick="document.getElementById('adminSide').classList.toggle('on')" aria-label="Menu" style="width:40px;height:40px;display:none" id="adminBurger">☰</button>
+        <button class="theme-toggle" onclick="document.getElementById('adminSide').classList.toggle('on')" aria-label="Menu" style="width:40px;height:40px;display:none" id="adminBurger"><?= icon('menu', 18) ?></button>
         <span class="top-title"><?= e($title ?? '') ?></span>
       </div>
       <div class="top-act">
-        <button class="theme-toggle" data-theme-toggle aria-label="Mode" style="width:40px;height:40px"><span data-theme-icon>🌙</span></button>
+        <button class="theme-toggle" data-theme-toggle aria-label="Mode" style="width:40px;height:40px"><span data-theme-icon><?= icon('moon', 18) ?></span></button>
         <span class="badge <?= ($is_super ?? false) ? 'b-info' : 'b-mut' ?>"><?= ($is_super ?? false) ? 'SUPER ADMIN' : 'ADMIN' ?></span>
         <a class="me" href="<?= url('logout') ?>" aria-label="Keluar"><span><?= e(mb_substr($user['name'] ?? 'A', 0, 1)) ?></span></a>
       </div>

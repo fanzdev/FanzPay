@@ -25,12 +25,12 @@ $__path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
 <meta property="og:title" content="<?= e($title ?? 'FanzPay') ?>">
 <meta property="og:description" content="<?= e($__desc) ?>">
 <meta property="og:url" content="<?= e($__canon) ?>">
-<meta property="og:image" content="<?= asset('img/logo.webp') ?>">
+<meta property="og:image" content="<?= asset('img/ambassador.webp') ?>">
 <meta property="og:locale" content="id_ID">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="<?= e($title ?? 'FanzPay') ?>">
 <meta name="twitter:description" content="<?= e($__desc) ?>">
-<meta name="twitter:image" content="<?= asset('img/logo.webp') ?>">
+<meta name="twitter:image" content="<?= asset('img/ambassador.webp') ?>">
 <link rel="icon" type="image/webp" href="<?= asset('img/logo.webp') ?>">
 <link rel="apple-touch-icon" href="<?= asset('img/logo.webp') ?>">
 <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('fanzpay-theme')||'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
@@ -57,65 +57,80 @@ $__path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
       <span>FanzPay</span>
     </a>
     <nav class="nav-links" aria-label="Navigasi utama">
-      <a href="<?= url('') ?>#produk">Produk</a>
-      <a href="<?= url('') ?>#fitur">Kenapa FanzPay</a>
-      <a href="<?= url('') ?>#filosofi">Filosofi</a>
-      <a href="<?= url('') ?>#cara">Cara mulai</a>
-      <a href="<?= url('download-apk') ?>">Unduh APK</a>
+      <a href="<?= url('') ?>">Beranda</a>
+      <a href="<?= url('layanan') ?>">Layanan</a>
+      <a href="<?= url('cara-kerja') ?>">Cara Kerja</a>
+      <a href="<?= url('keunggulan') ?>">Keunggulan</a>
+      <a href="<?= url('faq') ?>">FAQ</a>
     </nav>
     <div class="nav-cta">
-      <button class="theme-toggle" data-theme-toggle aria-label="Ganti mode gelap/terang"><span data-theme-icon>🌙</span></button>
+      <button class="theme-toggle" data-theme-toggle aria-label="Ganti mode gelap atau terang"><span data-theme-icon><?= icon('moon', 19) ?></span></button>
       <a class="btn btn-ghost" href="<?= url('login') ?>">Masuk</a>
-      <a class="btn btn-primary" href="<?= url('register') ?>">Daftar gratis</a>
-      <button class="hamburger" data-menu-toggle="#mmenu" aria-label="Buka menu">☰</button>
+      <a class="btn btn-primary" href="<?= url('register') ?>">Daftar Sekarang</a>
+      <button class="hamburger" data-menu-toggle="#mmenu" aria-label="Buka menu"><?= icon('menu', 20) ?></button>
     </div>
   </div>
   <nav class="mobile-menu" id="mmenu" aria-label="Menu seluler">
-    <a href="<?= url('') ?>#produk">Produk</a>
-    <a href="<?= url('') ?>#fitur">Kenapa FanzPay</a>
-    <a href="<?= url('') ?>#filosofi">Filosofi</a>
-    <a href="<?= url('') ?>#cara">Cara mulai</a>
-    <a href="<?= url('download-apk') ?>">⬇ Unduh Aplikasi Android</a>
+    <a href="<?= url('') ?>">Beranda</a>
+    <a href="<?= url('layanan') ?>">Layanan</a>
+    <a href="<?= url('cara-kerja') ?>">Cara Kerja</a>
+    <a href="<?= url('keunggulan') ?>">Keunggulan</a>
+    <a href="<?= url('faq') ?>">FAQ</a>
+    <a href="<?= url('harga') ?>">Harga dan Biaya</a>
+    <a href="<?= url('bantuan') ?>">Pusat Bantuan</a>
+    <a href="<?= url('download-apk') ?>">Unduh Aplikasi Android</a>
     <a href="<?= url('login') ?>">Masuk</a>
-    <a href="<?= url('register') ?>">Daftar gratis</a>
+    <a href="<?= url('register') ?>">Daftar Sekarang</a>
   </nav>
 </header>
 <main id="main"><?= $content ?? '' ?></main>
 <footer class="site-foot">
   <div class="wrap foot-in">
     <div class="foot-brand">
-      <a class="brand" href="<?= url('') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="30" height="30"><span>FanzPay</span></a>
-      <p style="margin-top:12px">Uangmu, ceritamu. FanzPay adalah dompet digital + PPOB yang tenang di depan, serius di belakang: ledger yang bisa diaudit, webhook terverifikasi, tanpa biaya tersembunyi. Dibangun untuk generasi yang bergerak cepat tapi tetap mikir.</p>
-      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-        <a class="btn btn-apk btn-sm" href="<?= url('download-apk') ?>">⬇ Unduh APK Android</a>
-        <a class="btn btn-ghost btn-sm" href="<?= url('register') ?>">Buat akun gratis</a>
+      <a class="brand" href="<?= url('') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="32" height="32" loading="lazy"><span>FanzPay</span></a>
+      <p class="foot-desc">FanzPay adalah dompet digital dan layanan PPOB Indonesia: deposit QRIS real-time, transfer gratis antar pengguna, tarik dana ke bank dan e-wallet, serta pembelian pulsa, paket data, listrik PLN, BPJS, e-money, dan voucher game. Setiap transaksi tercatat di ledger yang dapat diaudit.</p>
+      <div class="foot-cs">
+        <?= icon('headset', 18) ?>
+        <span>Butuh bantuan? Kunjungi <a href="<?= url('bantuan') ?>">Pusat Bantuan</a> atau hubungi customer service melalui aplikasi setelah masuk.</span>
       </div>
     </div>
     <div class="foot-col">
-      <h4>Produk</h4>
-      <a href="<?= url('login') ?>">Pulsa &amp; Paket Data</a>
-      <a href="<?= url('login') ?>">Token &amp; Tagihan PLN</a>
-      <a href="<?= url('login') ?>">E-Money &amp; Voucher Game</a>
-      <a href="<?= url('') ?>#produk">Lihat katalog</a>
+      <h4>Navigasi Website</h4>
+      <a href="<?= url('') ?>">Beranda</a>
+      <a href="<?= url('layanan') ?>">Layanan</a>
+      <a href="<?= url('cara-kerja') ?>">Cara Kerja</a>
+      <a href="<?= url('keunggulan') ?>">Keunggulan</a>
+      <a href="<?= url('harga') ?>">Harga dan Biaya</a>
+      <a href="<?= url('faq') ?>">FAQ</a>
+      <a href="<?= url('bantuan') ?>">Pusat Bantuan</a>
     </div>
     <div class="foot-col">
-      <h4>Akses</h4>
-      <a href="<?= url('login') ?>">Masuk — semua peran</a>
-      <a href="<?= url('register') ?>">Daftar pelanggan</a>
-      <a href="<?= url('setup-super') ?>">Setup Super Admin</a>
-      <a href="<?= url('download-apk') ?>">Unduh Android</a>
+      <h4>Layanan</h4>
+      <a href="<?= url('layanan') ?>#pulsa">Pulsa</a>
+      <a href="<?= url('layanan') ?>#data">Paket Data</a>
+      <a href="<?= url('layanan') ?>#pln">Token dan Tagihan PLN</a>
+      <a href="<?= url('layanan') ?>#bpjs">BPJS</a>
+      <a href="<?= url('layanan') ?>#emoney">Top Up E-Wallet</a>
+      <a href="<?= url('layanan') ?>#game">Voucher Game</a>
     </div>
     <div class="foot-col">
-      <h4>Transparansi</h4>
-      <a href="<?= url('sitemap.xml') ?>">Sitemap</a>
-      <a href="<?= url('robots.txt') ?>">Robots</a>
-      <a href="<?= url('login') ?>">Transfer gratis antar pengguna</a>
-      <a href="<?= url('login') ?>">Deposit QRIS real-time</a>
+      <h4>Akun</h4>
+      <a href="<?= url('login') ?>">Masuk</a>
+      <a href="<?= url('register') ?>">Daftar Sekarang</a>
+      <a href="<?= url('dashboard') ?>">Dashboard Pengguna</a>
+      <a href="<?= url('download-apk') ?>">Unduh Aplikasi Android</a>
+    </div>
+    <div class="foot-col">
+      <h4>Legal dan Perusahaan</h4>
+      <a href="<?= url('syarat-ketentuan') ?>">Syarat dan Ketentuan</a>
+      <a href="<?= url('kebijakan-privasi') ?>">Kebijakan Privasi</a>
+      <a href="<?= url('kebijakan-refund') ?>">Kebijakan Refund</a>
+      <a href="<?= url('bantuan') ?>#tentang">Tentang FanzPay</a>
     </div>
   </div>
   <div class="wrap foot-base">
-    <small>© <?= date('Y') ?> FanzPay · Pelan tapi pasti. Seluruh transaksi tercatat di ledger yang dapat diaudit.</small>
-    <small>#AntiRibet · #TransparanTanpaDrama</small>
+    <small>© <?= date('Y') ?> FanzPay. Seluruh hak cipta dilindungi. Transaksi dicatat di ledger yang dapat diaudit.</small>
+    <small>Dompet digital dan PPOB Indonesia.</small>
   </div>
 </footer>
 <script src="<?= asset('js/app.js') ?>" defer></script>
