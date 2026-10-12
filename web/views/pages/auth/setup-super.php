@@ -18,7 +18,7 @@
 
   <div class="wiz-panel" data-wpanel>
     <div class="field"><label for="s-name">Nama lengkap pendiri</label><input id="s-name" name="name" data-req required maxlength="100" autocomplete="name" placeholder="Nama lengkap sesuai identitas" value="<?= e(old_input('name')) ?>"><small class="wiz-err" data-werr></small></div>
-    <div class="field"><label for="s-phone">Nomor HP aktif</label><div class="phone-wrap"><span class="phone-pre">🇮🇩 +62</span><input id="s-phone" name="phone" data-req data-phone inputmode="tel" autocomplete="tel" placeholder="812 xxxx xxxx" required value="<?= e(old_input('phone')) ?>"></div><small class="wiz-err" data-werr></small></div>
+    <div class="field"><label for="s-phone">Nomor HP aktif</label><div class="phone-field"><span class="phone-prefix" aria-hidden="true"><span class="flag-id"><i></i><i></i></span><b>+62</b></span><input id="s-phone" name="phone" data-req data-phone inputmode="tel" autocomplete="tel" placeholder="812 xxxx xxxx" required value="<?= e(old_input('phone')) ?>"></div><small class="wiz-err" data-werr></small></div>
     <div class="wiz-nav"><button type="button" class="btn btn-primary btn-lg" data-wnext>Lanjut <?= icon('arrowR', 17) ?></button></div>
   </div>
 

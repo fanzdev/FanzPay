@@ -28,7 +28,7 @@ $items = [
 <body>
 <div class="shell">
   <aside class="side" aria-label="Navigasi">
-    <a class="brand" href="<?= url('home') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="34" height="34"><span>FanzPay</span></a>
+    <a class="brand" href="<?= url('home') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="44" height="44"><span>FanzPay</span></a>
     <nav class="side-nav">
       <?php foreach ($items as $it): ?>
         <a href="<?= $it['href'] ?>" class="<?= $nav === $it['k'] ? 'on' : '' ?>"><?= icon($it['icon'], 19) ?><span><?= e($it['label']) ?></span></a>

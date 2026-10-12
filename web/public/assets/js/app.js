@@ -52,7 +52,7 @@
     var h = ev.target.closest('[data-menu-toggle]');
     if (h) {
       var m = document.querySelector(h.getAttribute('data-menu-toggle'));
-      if (m) m.classList.toggle('on');
+      if (m) { var open = m.classList.toggle('on'); h.setAttribute('aria-expanded', open ? 'true' : 'false'); }
     }
   });
 
@@ -145,14 +145,14 @@
     paint();
   });
 
-  /* ---------- Input HP: chip +62 + auto-strip awalan ---------- */
+  /* ---------- Input HP: prefix +62 + auto-strip awalan ---------- */
   function stripID(v) {
     v = (v || '').replace(/[^\d]/g, '');
     while (/^62/.test(v)) v = v.slice(2);
     while (/^0/.test(v)) v = v.slice(1);
     return v.slice(0, 14);
   }
-  document.querySelectorAll('.phone-wrap input').forEach(function (inp) {
+  document.querySelectorAll('.phone-field input').forEach(function (inp) {
     inp.value = stripID(inp.value);
     inp.setAttribute('placeholder', '812 xxxx xxxx');
     inp.addEventListener('input', function () {
@@ -164,7 +164,7 @@
   document.addEventListener('submit', function (ev) {
     var f = ev.target;
     if (!f || !f.querySelector) return;
-    f.querySelectorAll('.phone-wrap input[name]').forEach(function (inp) {
+    f.querySelectorAll('.phone-field input[name]').forEach(function (inp) {
       var d = stripID(inp.value);
       if (d !== '') inp.value = '+62' + d;
     });

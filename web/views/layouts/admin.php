@@ -44,7 +44,7 @@ $menu = [
 <body>
 <div class="shell admin-shell">
   <aside class="side dark" id="adminSide" aria-label="Navigasi admin">
-    <a class="brand" href="<?= url('admin') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="32" height="32"><span>FanzPay <em><?= ($is_super ?? false) ? 'SUPER' : 'ADMIN' ?></em></span></a>
+    <a class="brand" href="<?= url('admin') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="44" height="44"><span>FanzPay <em><?= ($is_super ?? false) ? 'SUPER' : 'ADMIN' ?></em></span></a>
     <nav class="side-nav">
       <?php foreach ($menu as $m): ?>
         <a href="<?= $m['href'] ?>" class="<?= $nav === $m['k'] ? 'on' : '' ?>"><?= icon($m['icon'], 18) ?><span><?= e($m['label']) ?></span></a>

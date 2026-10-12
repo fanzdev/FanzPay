@@ -35,9 +35,6 @@
   --sh-lg:0 20px 70px rgba(0,0,0,.5);
   --sh-glow:0 0 0 1px rgba(255,255,255,.12) inset,0 10px 40px rgba(0,0,0,.5);
 }
-
-/* Indonesian flag colors for phone prefix */
-
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 html[data-theme="dark"]{color-scheme:dark}
@@ -47,10 +44,11 @@ body{
   transition:background .4s var(--ease),color .4s var(--ease);
   min-height:100vh;
 }
-/* Aurora background — light & dark aware */
-body::before,body::after{content:"";position:fixed;inset:auto;z-index:-1;pointer-events:none;filter:blur(90px);opacity:.55;transition:opacity .5s}
+/* Aurora background — light & dark aware, animasi fintech yang tenang */
+body::before,body::after{content:"";position:fixed;inset:auto;z-index:-1;pointer-events:none;filter:blur(90px);opacity:.55;transition:opacity .5s;animation:auroraDrift 18s ease-in-out infinite}
 body::before{width:560px;height:560px;left:-160px;top:-160px;background:radial-gradient(circle at 30% 30%,#1B4DFF 0%,transparent 62%),radial-gradient(circle at 70% 70%,#7C3AED 0%,transparent 60%)}
-body::after{width:620px;height:620px;right:-180px;top:22%;background:radial-gradient(circle,#2EA6E5 0%,transparent 62%),radial-gradient(circle at 60% 40%,#EC4899 0%,transparent 55%);opacity:.32}
+body::after{width:620px;height:620px;right:-180px;top:22%;background:radial-gradient(circle,#2EA6E5 0%,transparent 62%),radial-gradient(circle at 60% 40%,#EC4899 0%,transparent 55%);opacity:.32;animation-delay:-9s}
+@keyframes auroraDrift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,24px) scale(1.06)}}
 [data-theme="dark"] body::before{opacity:.34}
 [data-theme="dark"] body::after{opacity:.22}
 a{color:var(--brand-500);text-decoration:none}
@@ -125,9 +123,14 @@ p{margin:0 0 .8rem}
   backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--line);transition:box-shadow .3s,background .3s}
 .site-nav.scrolled{box-shadow:var(--sh)}
 .nav-in{display:flex;align-items:center;gap:22px;height:var(--nav-h)}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;color:var(--ink);font-family:var(--disp);letter-spacing:-.02em}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:21px;color:var(--ink);font-family:var(--disp);letter-spacing:-.02em}
 .brand:hover{text-decoration:none}
-.brand img{border-radius:10px;box-shadow:var(--sh)}
+.brand img{width:42px;height:42px;border-radius:13px;box-shadow:var(--sh);background:#fff;object-fit:cover}
+.brand span{line-height:1}
+.side .brand img{width:44px;height:44px}
+.auth-show-brand{gap:13px;font-size:23px}
+.auth-show-brand img{width:46px;height:46px;border-radius:14px}
+.site-foot .brand img{width:40px;height:40px}
 .brand em{font-style:normal;font-size:11.5px;color:#fff;background:var(--grad);font-weight:800;padding:3px 9px;border-radius:999px;letter-spacing:.04em}
 .nav-links{display:flex;gap:4px;margin-left:8px}
 .nav-links a{color:var(--ink-2);font-size:14px;font-weight:600;padding:9px 13px;border-radius:10px;transition:background .2s,color .2s}
@@ -220,7 +223,7 @@ p{margin:0 0 .8rem}
 
 /* ============ auth split (profesional dua kolom) ============ */
 .auth-split{position:relative;z-index:1;display:grid;grid-template-columns:1.02fr .98fr;min-height:100vh}
-.auth-show{min-height:100vh;background:linear-gradient(165deg,#0B1526 0%,#16295e 52%,#3b1d8f 130%);color:#fff;display:flex;padding:clamp(26px,3.5vw,48px)}
+.auth-show{position:relative;overflow:hidden;min-height:100vh;background:linear-gradient(165deg,#0B1526 0%,#16295e 52%,#3b1d8f 130%);color:#fff;display:flex;padding:clamp(26px,3.5vw,48px)}
 .auth-show::before{content:"";position:absolute;width:480px;height:480px;left:-140px;top:-140px;background:radial-gradient(circle,rgba(46,166,229,.4),transparent 65%);pointer-events:none}
 .auth-show::after{content:"";position:absolute;width:420px;height:420px;right:-120px;bottom:-120px;background:radial-gradient(circle,rgba(124,58,237,.5),transparent 65%);pointer-events:none}
 .auth-show-inner{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;width:100%;max-width:540px;margin:0 auto;min-height:0}
@@ -393,7 +396,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
 /* ============ SUPER RESPONSIF ============ */
 @media (max-width:1080px){
   .auth-split{grid-template-columns:1fr}
-  .auth-show{min-height:0;padding:30px 24px}
+  .auth-show{min-height:0;padding:30px 24px;border-bottom:none}
   .auth-feats{display:none}
   .auth-show h2{font-size:26px}
   .hero-grid{grid-template-columns:1fr;gap:34px}
@@ -454,10 +457,17 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
 @media (min-width:1280px){.content{max-width:960px}.content.wide{max-width:1200px}.wrap{max-width:1200px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
 
-/* ============ input HP dengan chip +62 (lembut) ============ */
-.phone-wrap{position:relative}
-.phone-wrap > input{width:100%;padding-left:74px}
-.phone-pre{position:absolute;left:7px;top:50%;transform:translateY(-50%);font:800 13.5px var(--font);color:var(--ink);background:var(--line-2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;pointer-events:none;white-space:nowrap}
+/* ============ input HP dengan prefix +62 (ID) ============ */
+.phone-field{position:relative;display:block}
+.phone-field > input{width:100%;padding-left:118px!important}
+.phone-prefix{position:absolute;left:7px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:8px;
+  font:800 14px var(--font);color:var(--ink);background:var(--line-2);border:1px solid var(--line);border-radius:11px;
+  padding:8px 12px;pointer-events:none;white-space:nowrap;line-height:1}
+.phone-prefix b{font-weight:800;letter-spacing:.01em}
+.flag-id{width:22px;height:16px;border-radius:4px;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(16,24,40,.18)}
+.flag-id i{display:block;height:50%}
+.flag-id i:first-child{background:#E11D2E}
+.flag-id i:last-child{background:#fff}
 
 /* ============ password mata di dalam input (lembut) ============ */
 .pass-wrap{position:relative}
@@ -716,4 +726,62 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
   .layanan-detail .btn{grid-column:1/-1;justify-self:start}
   .help-contact{grid-template-columns:1fr}
   .harga-note a{margin-left:0}
+}
+
+/* ============================================================
+   NAVBAR SIMPLE — bersih & profesional
+   ============================================================ */
+.nav-login{font-weight:700;font-size:14px;color:var(--ink-2);padding:9px 12px;border-radius:10px;white-space:nowrap}
+.nav-login:hover{color:var(--ink);text-decoration:none;background:var(--line-2)}
+.nav-cta .btn-sm{min-height:40px;padding:9px 16px;font-size:13.5px}
+.nav-links a.on{color:var(--ink)}
+.nav-links a.on::after{content:"";display:block;height:2px;border-radius:2px;background:var(--brand-600);margin-top:2px}
+.mobile-menu{border-top:1px solid var(--line)}
+.mobile-menu a.on{color:var(--brand-600)}
+
+/* ============================================================
+   FOOTER SIMPLE — bersih & profesional
+   ============================================================ */
+.site-foot{margin-top:48px}
+.foot-desc{max-width:32ch}
+.foot-base small a{color:var(--ink-2);font-weight:600}
+
+/* ============================================================
+   AUTH PANEL — simpel & profesional
+   ============================================================ */
+.auth-show{background:linear-gradient(170deg,#0A173C 0%,#12295F 100%);color:#fff;position:relative;overflow:hidden}
+.auth-show::before,.auth-show::after{display:none}
+.auth-deco{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.auth-deco i{position:absolute;border-radius:50%;filter:blur(70px)}
+.auth-deco i:nth-child(1){width:380px;height:380px;right:-130px;top:-120px;background:radial-gradient(circle,#2EA6E5,transparent 65%);opacity:.32;animation:authDrift1 16s ease-in-out infinite}
+.auth-deco i:nth-child(2){width:440px;height:440px;left:-150px;bottom:-160px;background:radial-gradient(circle,#1B4DFF,transparent 65%);opacity:.5;animation:authDrift2 20s ease-in-out infinite}
+@keyframes authDrift1{50%{transform:translate(-46px,34px) scale(1.08)}}
+@keyframes authDrift2{50%{transform:translate(46px,-34px) scale(1.06)}}
+.auth-show-inner{position:relative;z-index:1}
+.auth-show-brand{color:#fff;margin-bottom:28px;gap:14px}
+.auth-show-brand:hover{text-decoration:none}
+.auth-logo{flex:none;width:54px;height:54px;border-radius:16px;background:#fff;padding:5px;display:flex;box-shadow:0 10px 28px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.55)}
+.auth-logo img{width:100%;height:100%;object-fit:cover;border-radius:11px}
+.auth-brand-tx{display:flex;flex-direction:column;line-height:1.15;font-family:var(--disp);font-weight:800;font-size:22px;letter-spacing:-.02em;color:#fff}
+.auth-brand-tx em{font-style:normal;font-family:var(--font);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(219,231,255,.72);margin-top:2px}
+.auth-show-brand{color:#fff;margin-bottom:28px}
+.auth-show-brand:hover{text-decoration:none}
+.auth-show-brand img{border-radius:9px;border:1px solid rgba(255,255,255,.4)}
+.auth-show h2{color:#fff;font-size:clamp(24px,2.5vw,30px);line-height:1.25;margin:0 0 10px;max-width:20ch}
+.auth-lead{color:rgba(219,231,255,.8);font-size:14.5px;max-width:42ch;margin:0 0 26px}
+.auth-feats{margin:0;gap:0}
+.auth-feats li{background:transparent;border:none;border-radius:0;padding:10px 0}
+.auth-feats li + li{border-top:1px solid rgba(255,255,255,.14)}
+.auth-feats .ic{color:#7DD3FC;flex:none;margin-top:2px}
+.auth-feats strong{display:block;font-size:14px;color:#fff}
+.auth-feats small{color:rgba(219,231,255,.7);font-size:12.5px}
+.auth-small{color:rgba(219,231,255,.5);font-size:12.5px;margin:26px 0 0}
+
+/* responsive */
+@media (max-width:1080px){
+  .foot-in{grid-template-columns:1fr 1fr}
+}
+@media (max-width:767px){
+  .nav-login{display:none}
+  .foot-in{grid-template-columns:1fr}
 }
