@@ -17,17 +17,23 @@ require_once fp_base_path('views/partials/icons.php');
 </section>
 
 <div class="panel">
-  <h3>Produk populer</h3>
+  <div class="dash-head"><span class="dash-ic"><?= icon('grid', 22) ?></span><div><h3>Produk populer</h3><p>Delapan layanan dalam satu saldo.</p></div></div>
   <div class="quick">
     <a href="<?= url('produk?cat=pulsa') ?>"><?= icon('phone') ?>Pulsa</a>
     <a href="<?= url('produk?cat=data') ?>"><?= icon('wifi') ?>Data</a>
     <a href="<?= url('produk?cat=pln') ?>"><?= icon('zap') ?>PLN</a>
     <a href="<?= url('produk?cat=game') ?>"><?= icon('game') ?>Game</a>
   </div>
+  <div class="quick" style="margin-top:11px">
+    <a href="<?= url('produk?cat=bpjs') ?>"><?= icon('shieldCheck') ?>BPJS</a>
+    <a href="<?= url('produk?cat=emoney') ?>"><?= icon('wallet') ?>E-Money</a>
+    <a href="<?= url('produk') ?>"><?= icon('grid') ?>Semua</a>
+    <a href="<?= url('qr') ?>"><?= icon('qr') ?>QR Saya</a>
+  </div>
 </div>
 
 <div class="panel">
-  <h3>Transaksi terakhir</h3>
+  <div class="dash-head"><span class="dash-ic"><?= icon('clock', 22) ?></span><div><h3>Transaksi terakhir</h3><p>5 aktivitas terbaru di akunmu.</p></div></div>
   <?php if (empty($recent)): ?>
     <div class="empty"><?= icon('inbox', 28) ?><p>Belum ada transaksi.<br><a href="<?= url('deposit') ?>">Deposit pertama</a> untuk memulai.</p></div>
   <?php else: ?>
@@ -39,4 +45,14 @@ require_once fp_base_path('views/partials/icons.php');
       </a>
     <?php endforeach; ?>
   <?php endif; ?>
+</div>
+
+<div class="panel">
+  <div class="dash-head"><span class="dash-ic"><?= icon('spark', 22) ?></span><div><h3>Mulai dalam 3 langkah</h3><p>Alur tercepat memakai FanzPay.</p></div></div>
+  <ol class="guide">
+    <li><span class="g-num">1</span><span><b>Deposit via QRIS</b> — saldo masuk otomatis setelah terbayar.</span></li>
+    <li><span class="g-num">2</span><span><b>Buat PIN 6 digit</b> — wajib untuk transfer, tarik dana, dan belanja.</span></li>
+    <li><span class="g-num">3</span><span><b>Beli &amp; bayar</b> — pulsa, PLN, BPJS, e-money, dan game dari satu saldo.</span></li>
+  </ol>
+  <div class="info-note"><?= icon('shieldCheck', 18) ?><span>Semua mutasi tercatat di ledger dan bisa ditelusuri di <a href="<?= url('riwayat') ?>"><strong>Riwayat Transaksi</strong></a>.</span></div>
 </div>

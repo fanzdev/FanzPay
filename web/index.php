@@ -12,6 +12,12 @@ require __DIR__ . '/app/Core/helpers.php';
 // PHP built-in server: layani file statis langsung (Apache sudah via .htaccess).
 if (PHP_SAPI === 'cli-server') {
     $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+    // Jangan pernah sajikan file internal — paritas dengan .htaccess + guard router di bawah.
+    $isSensitive = in_array($reqPath, ['/.env', '/create-admin.php', '/sync.php', '/install.php'], true)
+        || str_starts_with($reqPath, '/config/') || str_starts_with($reqPath, '/storage/')
+        || str_starts_with($reqPath, '/tests/') || str_starts_with($reqPath, '/database/')
+        || str_starts_with($reqPath, '/app/') || str_starts_with($reqPath, '/.');
+    if ($isSensitive) { http_response_code(404); exit; }
     $static = __DIR__ . $reqPath;
     if ($reqPath !== '/' && is_file($static) && str_starts_with(realpath($static) ?: '', realpath(__DIR__) ?: __DIR__)) {
         $ext = strtolower(pathinfo($static, PATHINFO_EXTENSION));
@@ -58,6 +64,17 @@ if ($path === '/index.php') $path = '/';
 $isApi = str_starts_with($path, '/api/');
 $isWebhook = str_starts_with($path, '/webhooks/');
 
+// ---- SEO/keamanan: path internal tidak pernah di-serve (defense in depth di semua SAPI,
+// melengkapi .htaccess agar tetap aman mis. di PHP built-in server / hosting tanpa .htaccess) ----
+$__blockedFile = in_array($path, ['/.env', '/create-admin.php', '/sync.php', '/install.php'], true);
+$__blockedDir = str_starts_with($path, '/config/') || str_starts_with($path, '/storage/')
+    || str_starts_with($path, '/tests/') || str_starts_with($path, '/database/')
+    || str_starts_with($path, '/app/');
+if ($__blockedFile || $__blockedDir) {    http_response_code(404);
+    View::render('errors/404', ['title' => 'Tidak ditemukan', 'robots' => 'noindex, nofollow'], 'public');
+    exit;
+}
+
 if (!$isApi && !$isWebhook && Settings::maintenance()) {
     $u = Auth::user();
     $allowed = $u && $u['role'] === 'super_admin' && in_array($path, ['/login', '/logout', '/admin', '/admin/pengaturan'], true);
@@ -67,7 +84,7 @@ if (!$isApi && !$isWebhook && Settings::maintenance()) {
         || str_starts_with($path, '/pay/') || str_starts_with($path, '/public/assets');
     if (!$allowed && !$publicOk) {
         http_response_code(503);
-        View::render('errors/maintenance', ['title' => 'Maintenance'], 'public');
+        View::render('errors/maintenance', ['title' => 'Maintenance', 'robots' => 'noindex, nofollow'], 'public');
         exit;
     }
 }
@@ -78,7 +95,7 @@ set_exception_handler(function (Throwable $e): void {
     $acceptsJson = str_contains((string)($_SERVER['HTTP_ACCEPT'] ?? ''), 'json') || str_starts_with(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '', app_base()['path'] . '/api');
     if ($acceptsJson) { json_response(['ok' => false, 'message' => 'Transaksi sedang diproses.'], 500); }
     http_response_code(500);
-    try { View::render('errors/500', ['title' => 'Gangguan'], 'public'); } catch (Throwable $t) { echo 'Transaksi sedang diproses.'; }
+    try { View::render('errors/500', ['title' => 'Gangguan', 'robots' => 'noindex, nofollow'], 'public'); } catch (Throwable $t) { echo 'Transaksi sedang diproses.'; }
 });
 
 $router = new Router();
@@ -191,7 +208,7 @@ if (!$match) {
     }
     http_response_code(404);
     if ($isApi) json_response(['ok' => false, 'message' => 'Tidak ditemukan.'], 404);
-    View::render('errors/404', ['title' => 'Tidak ditemukan'], 'public');
+    View::render('errors/404', ['title' => 'Tidak ditemukan', 'robots' => 'noindex, nofollow'], 'public');
     exit;
 }
 

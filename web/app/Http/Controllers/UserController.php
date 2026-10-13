@@ -86,7 +86,7 @@ final class UserController {
     }
 
     public function deposit(): void {
-        $this->base('user/deposit', ['title' => 'Deposit', 'nav' => 'home', 'error' => flash('error'), 'min' => Settings::int('min_deposit', 10000), 'max' => Settings::int('max_deposit', 5000000)]);
+        $this->base('user/deposit', ['title' => 'Deposit', 'nav' => 'deposit', 'error' => flash('error'), 'min' => Settings::int('min_deposit', 10000), 'max' => Settings::int('max_deposit', 5000000)]);
     }
 
     public function doDeposit(): void {
@@ -99,13 +99,13 @@ final class UserController {
     public function depositShow(string $ref): void {
         $d = DB::one('SELECT * FROM deposits WHERE reference_id=? AND user_id=?', [$ref, (int)$this->u['id']]);
         if (!$d) { http_response_code(404); redirect('deposit'); }
-        $this->base('user/deposit-show', ['title' => 'Bayar Deposit', 'nav' => 'home', 'd' => $d]);
+        $this->base('user/deposit-show', ['title' => 'Bayar Deposit', 'nav' => 'deposit', 'd' => $d]);
     }
 
     public function withdraw(): void {
         $uid = (int)$this->u['id'];
         $this->base('user/withdraw', [
-            'title' => 'Tarik Dana', 'nav' => 'home', 'error' => flash('error'), 'ok' => flash('ok'),
+            'title' => 'Tarik Dana', 'nav' => 'withdraw', 'error' => flash('error'), 'ok' => flash('ok'),
             'dests' => DB::all('SELECT * FROM withdrawal_destinations WHERE user_id=? ORDER BY id DESC', [$uid]),
             'min' => Settings::int('min_withdraw', 20000),
         ]);
@@ -149,7 +149,7 @@ final class UserController {
     public function notifications(): void {
         $uid = (int)$this->u['id'];
         DB::exec('UPDATE notifications SET is_read=1 WHERE user_id=?', [$uid]);
-        $this->base('user/notifications', ['title' => 'Notifikasi', 'nav' => 'home', 'rows' => NotificationService::list($uid, 30)]);
+        $this->base('user/notifications', ['title' => 'Notifikasi', 'nav' => 'notif', 'rows' => NotificationService::list($uid, 30)]);
     }
 
     public function profile(): void {

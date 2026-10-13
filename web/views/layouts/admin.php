@@ -3,21 +3,13 @@
 require_once fp_base_path('views/partials/icons.php');
 /** @var string $title */ /** @var string $nav */ /** @var array $user */ /** @var bool $is_super */
 $nav = $nav ?? 'dashboard';
-$menu = [
-    ['k' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'chart', 'href' => url('admin')],
-    ['k' => 'users', 'label' => 'Pengguna', 'icon' => 'user', 'href' => url('admin/pengguna')],
-    ['k' => 'tx', 'label' => 'Transaksi', 'icon' => 'clock', 'href' => url('admin/transaksi')],
-    ['k' => 'deposits', 'label' => 'Deposit', 'icon' => 'plus', 'href' => url('admin/deposit')],
-    ['k' => 'withdrawals', 'label' => 'Withdrawal', 'icon' => 'card', 'href' => url('admin/withdraw')],
-    ['k' => 'products', 'label' => 'Produk', 'icon' => 'grid', 'href' => url('admin/produk')],
-    ['k' => 'reports', 'label' => 'Laporan', 'icon' => 'inbox', 'href' => url('admin/laporan')],
-    ['k' => 'reconcile', 'label' => 'Rekonsiliasi', 'icon' => 'swap', 'href' => url('admin/rekonsiliasi')],
-    ['k' => 'admins', 'label' => 'Admin', 'icon' => 'shield', 'href' => url('admin/admin')],
-    ['k' => 'notifications', 'label' => 'Notifikasi', 'icon' => 'bell', 'href' => url('admin/notifikasi')],
-    ['k' => 'audit', 'label' => 'Audit Log', 'icon' => 'search', 'href' => url('admin/audit')],
-    ['k' => 'settings', 'label' => 'Pengaturan', 'icon' => 'gear', 'href' => url('admin/pengaturan')],
-    ['k' => 'apiconfig', 'label' => 'API Config', 'icon' => 'zap', 'href' => url('admin/api')],
-];
+$opKeys = ['tx', 'deposits', 'withdrawals', 'reconcile'];
+$bizKeys = ['users', 'products', 'reports'];
+$sysKeys = ['admins', 'notifications', 'audit', 'settings', 'apiconfig'];
+$opOpen = in_array($nav, $opKeys, true);
+$bizOpen = in_array($nav, $bizKeys, true);
+$sysOpen = in_array($nav, $sysKeys, true);
+$__isSuper = ($is_super ?? false);
 ?>
 <!doctype html>
 <html lang="id" data-theme="light">
@@ -44,15 +36,45 @@ $menu = [
 <body>
 <div class="shell admin-shell">
   <aside class="side dark" id="adminSide" aria-label="Navigasi admin">
-    <a class="brand" href="<?= url('admin') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="44" height="44"><span>FanzPay <em><?= ($is_super ?? false) ? 'SUPER' : 'ADMIN' ?></em></span></a>
+    <a class="brand" href="<?= url('admin') ?>"><img src="<?= asset('img/logo.webp') ?>" alt="FanzPay" width="44" height="44"><span>FanzPay <em><?= $__isSuper ? 'SUPER' : 'ADMIN' ?></em></span></a>
+    <div class="side-role"><span class="side-role-ic"><?= icon($__isSuper ? 'shieldCheck' : 'shield', 18) ?></span><span><b><?= $__isSuper ? 'Super Admin' : 'Administrator' ?></b><small>Kontrol penuh operasional</small></span></div>
     <nav class="side-nav">
-      <?php foreach ($menu as $m): ?>
-        <a href="<?= $m['href'] ?>" class="<?= $nav === $m['k'] ? 'on' : '' ?>"><?= icon($m['icon'], 18) ?><span><?= e($m['label']) ?></span></a>
-      <?php endforeach; ?>
+      <p class="side-cap">Utama</p>
+      <a href="<?= url('admin') ?>" class="<?= $nav === 'dashboard' ? 'on' : '' ?>"><span class="side-ic"><?= icon('chart', 17) ?></span><span>Command Center</span></a>
+      <p class="side-cap">Operasional</p>
+      <details class="side-group"<?= $opOpen ? ' open' : '' ?>>
+        <summary class="side-group-h<?= $opOpen ? ' on' : '' ?>"><span class="side-ic"><?= icon('swap', 17) ?></span><span>Transaksi Dana</span><span class="side-chev"><?= icon('chev', 14) ?></span></summary>
+        <div class="side-sub">
+          <a href="<?= url('admin/transaksi') ?>" class="<?= $nav === 'tx' ? 'on' : '' ?>"><span class="side-ic"><?= icon('clock', 15) ?></span><span>Transaksi</span></a>
+          <a href="<?= url('admin/deposit') ?>" class="<?= $nav === 'deposits' ? 'on' : '' ?>"><span class="side-ic"><?= icon('plus', 15) ?></span><span>Deposit</span></a>
+          <a href="<?= url('admin/withdraw') ?>" class="<?= $nav === 'withdrawals' ? 'on' : '' ?>"><span class="side-ic"><?= icon('card', 15) ?></span><span>Withdrawal</span></a>
+          <a href="<?= url('admin/rekonsiliasi') ?>" class="<?= $nav === 'reconcile' ? 'on' : '' ?>"><span class="side-ic"><?= icon('refresh', 15) ?></span><span>Rekonsiliasi</span></a>
+        </div>
+      </details>
+      <p class="side-cap">Bisnis</p>
+      <details class="side-group"<?= $bizOpen ? ' open' : '' ?>>
+        <summary class="side-group-h<?= $bizOpen ? ' on' : '' ?>"><span class="side-ic"><?= icon('users', 17) ?></span><span>Pengguna &amp; Produk</span><span class="side-chev"><?= icon('chev', 14) ?></span></summary>
+        <div class="side-sub">
+          <a href="<?= url('admin/pengguna') ?>" class="<?= $nav === 'users' ? 'on' : '' ?>"><span class="side-ic"><?= icon('user', 15) ?></span><span>Pengguna</span></a>
+          <a href="<?= url('admin/produk') ?>" class="<?= $nav === 'products' ? 'on' : '' ?>"><span class="side-ic"><?= icon('grid', 15) ?></span><span>Produk &amp; Harga</span></a>
+          <a href="<?= url('admin/laporan') ?>" class="<?= $nav === 'reports' ? 'on' : '' ?>"><span class="side-ic"><?= icon('inbox', 15) ?></span><span>Laporan</span></a>
+        </div>
+      </details>
+      <p class="side-cap">Sistem</p>
+      <details class="side-group"<?= $sysOpen ? ' open' : '' ?>>
+        <summary class="side-group-h<?= $sysOpen ? ' on' : '' ?>"><span class="side-ic"><?= icon('gear', 17) ?></span><span>Tim &amp; Sistem</span><span class="side-chev"><?= icon('chev', 14) ?></span></summary>
+        <div class="side-sub">
+          <a href="<?= url('admin/admin') ?>" class="<?= $nav === 'admins' ? 'on' : '' ?>"><span class="side-ic"><?= icon('shield', 15) ?></span><span>Kelola Admin</span></a>
+          <a href="<?= url('admin/notifikasi') ?>" class="<?= $nav === 'notifications' ? 'on' : '' ?>"><span class="side-ic"><?= icon('bell', 15) ?></span><span>Notifikasi</span></a>
+          <a href="<?= url('admin/audit') ?>" class="<?= $nav === 'audit' ? 'on' : '' ?>"><span class="side-ic"><?= icon('search', 15) ?></span><span>Audit Log</span></a>
+          <a href="<?= url('admin/pengaturan') ?>" class="<?= $nav === 'settings' ? 'on' : '' ?>"><span class="side-ic"><?= icon('gear', 15) ?></span><span>Pengaturan</span></a>
+          <a href="<?= url('admin/api') ?>" class="<?= $nav === 'apiconfig' ? 'on' : '' ?>"><span class="side-ic"><?= icon('zap', 15) ?></span><span>API Config</span></a>
+        </div>
+      </details>
     </nav>
     <div class="side-foot">
-      <span class="who"><?= e($user['name'] ?? '') ?> · <?= e($user['role'] ?? '') ?></span>
-      <a href="<?= url('logout') ?>"><?= icon('out', 18) ?><span>Keluar</span></a>
+      <a class="side-user" href="<?= url('admin/pengaturan') ?>"><span class="side-ava"><?= e(mb_strtoupper(mb_substr($user['name'] ?? 'A', 0, 1))) ?></span><span class="side-who"><b><?= e(mb_substr($user['name'] ?? 'Admin', 0, 22)) ?></b><small><?= e($user['role'] ?? '') ?></small></span></a>
+      <a href="<?= url('logout') ?>"><span class="side-ic"><?= icon('out', 16) ?></span><span>Keluar</span></a>
     </div>
   </aside>
   <div class="admin-backdrop" onclick="document.getElementById('adminSide').classList.remove('on')"></div>

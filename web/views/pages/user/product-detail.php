@@ -2,8 +2,7 @@
 <?php if ($error): ?><div class="alert err"><?= e($error) ?></div><?php endif; ?>
 <?php if ($ok): ?><div class="alert ok"><?= e($ok) ?></div><?php endif; ?>
 <div class="panel">
-  <h3><?= e($p['name']) ?></h3>
-  <p style="color:var(--mut);font-size:14px"><?= e($p['cat_name']) ?> · Harga final</p>
+  <div class="dash-head"><span class="dash-ic"><?= icon('tag', 22) ?></span><div><h3><?= e($p['name']) ?></h3><p><?= e($p['cat_name']) ?> · Harga final</p></div></div>
   <p style="font-size:28px;font-weight:700;color:var(--brand-700)"><?= rupiah((int)$p['sell_price']) ?></p>
   <form method="post" action="<?= url('ppob/beli') ?>" data-idem>
     <?= \App\Core\CSRF::field() ?>
@@ -13,4 +12,9 @@
     <div class="field"><label for="pin">PIN transaksi (6 digit)</label><input id="pin" name="pin" type="password" inputmode="numeric" maxlength="6" required placeholder="••••••"></div>
     <button class="btn btn-primary btn-block" type="submit">Bayar <?= rupiah((int)$p['sell_price']) ?></button>
   </form>
+  <ol class="guide">
+    <li><span class="g-num">1</span><span><b>Isi nomor tujuan</b> dengan teliti — pulsa/ID yang salah tidak bisa dibatalkan.</span></li>
+    <li><span class="g-num">2</span><span><b>Konfirmasi dengan PIN</b> 6 digit milikmu.</span></li>
+    <li><span class="g-num">3</span><span><b>Pantau status</b> di <a href="<?= url('riwayat') ?>"><strong>Riwayat</strong></a> — gagal otomatis jadi refund.</span></li>
+  </ol>
 </div>

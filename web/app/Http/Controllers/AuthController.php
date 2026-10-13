@@ -104,7 +104,7 @@ final class AuthController {
             // Super admin hanya boleh SATU akun: URL ini mati total setelah ada.
             Logger::audit(null, null, 'auth.setup_super.blocked', 'users', null, 'fail', ['ip' => client_ip()]);
             http_response_code(404);
-            View::render('errors/404', ['title' => 'Tidak ditemukan'], 'public');
+            View::render('errors/404', ['title' => 'Tidak ditemukan', 'robots' => 'noindex, nofollow'], 'public');
             return;
         }
         View::render('auth/setup-super', ['title' => 'Setup Super Admin — FanzPay', 'error' => flash('error')], 'auth');
@@ -115,7 +115,7 @@ final class AuthController {
         if (self::superAdminExists()) {
             Logger::audit(null, null, 'auth.setup_super.blocked', 'users', null, 'fail', ['ip' => client_ip()]);
             http_response_code(404);
-            View::render('errors/404', ['title' => 'Tidak ditemukan'], 'public');
+            View::render('errors/404', ['title' => 'Tidak ditemukan', 'robots' => 'noindex, nofollow'], 'public');
             return;
         }
         if (!CSRF::check($_POST['_csrf'] ?? null)) { flash('error', 'Sesi kedaluwarsa. Coba lagi.'); redirect('setup-super'); }

@@ -5,10 +5,9 @@ declare(strict_types=1);
  * cPanel Cron: php /home/user/public_html/cron/reconcile.php
  * atau: curl -s https://domain/webhooks/digiflazz (hanya logging)
  */
-if (PHP_SAPI !== 'cli' && ($_GET['key'] ?? '') !== (getenv('CRON_KEY') ?: '')) {
-    // Izinkan via HTTP hanya bila CRON_KEY cocok; default tolak.
-    if ((getenv('CRON_KEY') ?: '') === '') { http_response_code(403); exit('forbidden'); }
-}
+// Cron via HTTP hanya bila CRON_KEY terisi dan cocok; tanpa key selalu ditolak.
+$__cronKey = (string)(getenv('CRON_KEY') ?: '');
+if (PHP_SAPI !== 'cli' && ($__cronKey === '' || ($_GET['key'] ?? '') !== $__cronKey)) { http_response_code(403); exit('forbidden'); }
 require __DIR__ . '/../config/config.php';
 require __DIR__ . '/../app/Core/helpers.php';
 spl_autoload_register(function (string $c): void {

@@ -26,7 +26,7 @@ final class WebController {
         } catch (\Throwable $e) { $featured = []; }
         $apk = $this->apkInfo();
         View::render('landing', [
-            'title' => 'FanzPay — Dompet Digital & PPOB untuk Generasi Bergerak Cepat',
+            'title' => 'FanzPay — Dompet Digital & PPOB Indonesia',
             'featured' => $featured,
             'catalog_total' => $catalogTotal,
             'cat_total' => $catTotal,
@@ -35,7 +35,7 @@ final class WebController {
             'max_deposit' => Settings::int('max_deposit', 5000000),
             'min_withdraw' => Settings::int('min_withdraw', 20000),
             'min_transfer' => Settings::int('min_transfer', 1000),
-            'meta_desc' => 'FanzPay adalah dompet digital + PPOB: deposit QRIS real-time, transfer gratis antar pengguna, tarik dana ke bank & e-wallet, beli pulsa, data, PLN, e-money, dan voucher game. Transparan, aman, tanpa biaya tersembunyi.',
+            'meta_desc' => 'FanzPay: dompet digital + PPOB Indonesia. Deposit QRIS real-time, transfer gratis, tarik dana, beli pulsa, data, PLN, BPJS, e-money, dan voucher game.',
         ], 'public');
     }
 
@@ -87,9 +87,23 @@ final class WebController {
 
     /** GET /faq — pertanyaan umum. */
     public function faq(): void {
+        // Sumber tunggal Q&A: dipakai view (HTML) + layout (FAQPage JSON-LD). Tanpa konten palsu.
+        $items = [
+            ['q' => 'Apa itu FanzPay?', 'a' => 'FanzPay adalah dompet digital dan layanan PPOB Indonesia. Dengan satu akun kamu bisa menyimpan saldo, transfer ke sesama pengguna tanpa biaya, menarik dana ke bank dan e-wallet, serta membeli pulsa, paket data, token dan tagihan PLN, BPJS, top up e-money, dan voucher game.'],
+            ['q' => 'Bagaimana cara mendaftar?', 'a' => 'Buka halaman Registrasi, isi nama lengkap, nomor HP aktif, email aktif, dan kata sandi minimal 8 karakter. Masukkan kode OTP yang dikirim ke email untuk verifikasi, lalu buat PIN 6 digit yang dipakai untuk setiap transaksi sensitif.'],
+            ['q' => 'Bagaimana cara mengisi saldo?', 'a' => 'Masuk ke dashboard, buka menu Deposit, masukkan nominal sesuai batas yang tampil, lalu pindai kode QRIS yang dibuat sistem. Saldo masuk otomatis setelah pembayaran terverifikasi oleh provider. Status pending, berhasil, atau kedaluwarsa bisa dipantau di menu Deposit dan Riwayat.'],
+            ['q' => 'Bagaimana cara melakukan transaksi?', 'a' => 'Pilih produk di menu Produk dashboard, masukkan nomor atau ID tujuan, periksa nama produk dan harga final, konfirmasi pembayaran dengan PIN 6 digit, lalu periksa status di menu Riwayat dan notifikasi.'],
+            ['q' => 'Apa yang terjadi jika transaksi gagal?', 'a' => 'Dana otomatis dikembalikan ke saldo dan status transaksi berubah menjadi refund, gagal, atau reversed. Kamu menerima notifikasi dan dapat melihat referensi pengembalian di Riwayat. Tidak ada dana yang hilang sepihak.'],
+            ['q' => 'Berapa lama proses transaksi?', 'a' => 'Sebagian besar pembelian PPOB selesai dalam hitungan detik hingga beberapa menit mengikuti respons provider. Jika status masih pending atau processing, tunggu notifikasi berikutnya dan hindari mengulang pembayaran yang sama.'],
+            ['q' => 'Bagaimana cara transfer saldo?', 'a' => 'Buka menu Transfer, masukkan nomor HP penerima atau pindai QR Code-nya, isi nominal, lalu konfirmasi dengan PIN. Transfer antar pengguna gratis (Rp0) dan tercatat di Riwayat kedua belah pihak.'],
+            ['q' => 'Bagaimana cara mengamankan akun?', 'a' => 'Gunakan kata sandi unik, rahasiakan PIN 6 digit, pastikan email terverifikasi, aktifkan kunci layar perangkat, dan selalu keluar dari dashboard di perangkat bersama. Segera ganti kata sandi jika ada aktivitas yang tidak dikenal.'],
+            ['q' => 'Bagaimana cara menghubungi customer service?', 'a' => 'Buka halaman Pusat Bantuan untuk panduan mandiri dan kanal kontak resmi. Siapkan email akun, nomor HP, dan nomor referensi transaksi agar penanganan lebih cepat.'],
+        ];
         View::render('faq', [
             'title' => 'FAQ — Pertanyaan Umum FanzPay',
             'meta_desc' => 'Jawaban atas pertanyaan umum FanzPay: pendaftaran, isi saldo, transaksi, transaksi gagal, transfer, keamanan akun, dan customer service.',
+            'faq_items' => $items,
+            'faq_schema' => $items,
         ], 'public');
     }
 
@@ -125,11 +139,11 @@ final class WebController {
         ], 'public');
     }
 
-    /** Halaman publik pay/{public_id}: tampilkan nama penerima (tanpa data sensitif). */
+    /** Halaman publik pay/{public_id}: tampilkan nama penerima (tanpa data sensitif). Halaman per-user = noindex. */
     public function pay(string $publicId): void {
         $t = DB::one('SELECT name, public_id FROM users WHERE public_id = ? AND role = "user" AND status = ?', [$publicId, 'active']);
-        if (!$t) { http_response_code(404); View::render('errors/404', ['title' => 'Tidak ditemukan'], 'public'); return; }
-        View::render('pay', ['title' => 'Kirim ke ' . $t['name'], 'to' => $t], 'public');
+        if (!$t) { http_response_code(404); View::render('errors/404', ['title' => 'Tidak ditemukan', 'robots' => 'noindex, nofollow'], 'public'); return; }
+        View::render('pay', ['title' => 'Kirim ke ' . $t['name'], 'to' => $t, 'robots' => 'noindex, nofollow'], 'public');
     }
 
     /** Info file APK Android (tanpa data palsu: ukuran & versi dibaca dari file asli bila ada). */
@@ -149,6 +163,14 @@ final class WebController {
 
     /** GET /download-apk — unduh file Android bila sudah diunggah admin, jika belum tampilkan panduan build. */
     public function downloadApk(): void {
+        // SEO: /unduh adalah alias — permanen ke URL kanonis agar tidak ada konten ganda.
+        $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+        $bp = app_base()['path'];
+        if ($bp !== '' && str_starts_with($reqPath, $bp)) $reqPath = substr($reqPath, strlen($bp));
+        if (rtrim($reqPath, '/') === '/unduh') {
+            $qs = (string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY);
+            redirect('download-apk' . ($qs !== '' ? '?' . $qs : ''), 301);
+        }
         $file = fp_base_path('public/assets/apk/fanzpay.apk');
         if (is_file($file) && isset($_GET['go'])) {
             $name = 'fanzpay-' . date('Ymd', (int)filemtime($file)) . '.apk';
@@ -173,7 +195,7 @@ final class WebController {
                 exit;
             }
         }
-        View::render('download', ['title' => 'Unduh Aplikasi Android FanzPay', 'apk' => $apk], 'public');
+        View::render('download', ['title' => 'Unduh Aplikasi Android FanzPay', 'apk' => $apk, 'meta_desc' => 'Unduh aplikasi Android resmi FanzPay (APK): deposit QRIS real-time, transfer gratis, beli pulsa, data, PLN, dan voucher game dalam satu aplikasi.'], 'public');
     }
 
     /** Sitemap XML dinamis untuk SEO. */
@@ -192,8 +214,6 @@ final class WebController {
             ['loc' => $base . '/syarat-ketentuan', 'freq' => 'monthly', 'pr' => '0.4'],
             ['loc' => $base . '/kebijakan-privasi', 'freq' => 'monthly', 'pr' => '0.4'],
             ['loc' => $base . '/kebijakan-refund', 'freq' => 'monthly', 'pr' => '0.4'],
-            ['loc' => $base . '/login', 'freq' => 'monthly', 'pr' => '0.6'],
-            ['loc' => $base . '/register', 'freq' => 'monthly', 'pr' => '0.7'],
             ['loc' => $base . '/download-apk', 'freq' => 'weekly', 'pr' => '0.8'],
         ];
         header('Content-Type: application/xml; charset=utf-8');
@@ -206,11 +226,34 @@ final class WebController {
         exit;
     }
 
-    /** Robots.txt untuk crawler. */
+    /** Robots.txt untuk crawler: halaman privat & per-user ditutup agar crawl budget fokus ke konten. */
     public function robots(): void {
         $base = rtrim((string)config('app.url', url('')), '/');
         header('Content-Type: text/plain; charset=utf-8');
-        echo "User-agent: *\nAllow: /\nAllow: /download-apk\nDisallow: /admin\nDisallow: /api/\nDisallow: /deposit/\nDisallow: /riwayat/\nSitemap: " . $base . "/sitemap.xml\n";
+        $lines = [
+            'User-agent: *',
+            'Allow: /',
+            'Disallow: /admin',
+            'Disallow: /api/',
+            'Disallow: /webhooks/',
+            'Disallow: /home',
+            'Disallow: /dashboard',
+            'Disallow: /produk',
+            'Disallow: /transfer',
+            'Disallow: /deposit',
+            'Disallow: /withdraw',
+            'Disallow: /riwayat/',
+            'Disallow: /notifikasi',
+            'Disallow: /profil',
+            'Disallow: /pin',
+            'Disallow: /qr',
+            'Disallow: /verify',
+            'Disallow: /logout',
+            'Disallow: /pay/',
+            'Disallow: /setup-super',
+            'Sitemap: ' . $base . '/sitemap.xml',
+        ];
+        echo implode("\n", $lines) . "\n";
         exit;
     }
 }

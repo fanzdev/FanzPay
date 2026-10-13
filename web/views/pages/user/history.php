@@ -2,10 +2,14 @@
 require_once fp_base_path('views/partials/icons.php');
 /** @var array $rows */ /** @var string $kind */
 ?>
+<div class="panel">
+  <div class="dash-head"><span class="dash-ic"><?= icon('receipt', 22) ?></span><div><h3>Semua aktivitas</h3><p>Saring per jenis · ketuk untuk detail &amp; jejak ledger.</p></div></div>
 <div class="chips">
   <?php foreach (['' => 'Semua', 'deposit' => 'Deposit', 'transfer' => 'Transfer', 'ppob' => 'PPOB', 'withdraw' => 'Withdraw'] as $k => $l): ?>
     <a class="chip <?= $kind === $k ? 'on' : '' ?>" href="<?= url('riwayat' . ($k !== '' ? '?kind=' . $k : '')) ?>"><?= $l ?></a>
   <?php endforeach; ?>
+</div>
+  <div class="info-note"><?= icon('checkCircle', 18) ?><span>Setiap transaksi punya <strong>referensi unik</strong> dan jejak ledger yang bisa direkonstruksi penuh.</span></div>
 </div>
 <div class="panel">
   <?php if (empty($rows)): ?><div class="empty"><?= icon('inbox', 28) ?><p>Belum ada riwayat.</p></div><?php endif; ?>

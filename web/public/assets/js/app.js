@@ -1,6 +1,10 @@
 /* FanzPay app.js — glassmorphism interactions: theme, reveal, nav, idempotency, polling. */
 (function () {
   'use strict';
+  /* Singleton guard: cegah double-binding bila script termuat/ dieksekusi dua kali.
+     Tanpa ini, satu ketukan pada toggle menu memicu dua handler (buka lalu tutup) → terlihat kedip-kedip. */
+  if (window.__fanzpayBooted) return;
+  window.__fanzpayBooted = true;
 
   /* ---------- THEME: Dark/Light, default Light ---------- */
   var root = document.documentElement;
@@ -44,16 +48,44 @@
     t._h = setTimeout(function () { t.classList.remove('show'); setTimeout(function(){ t.style.display='none'; }, 320); }, 2600);
   }
 
-  /* ---------- NAV: shadow on scroll + mobile menu ---------- */
+  /* ---------- NAV: shadow on scroll + mobile menu elegan (selalu di depan) ---------- */
   var nav = document.querySelector('.site-nav');
   function onScroll(){ if (nav) nav.classList.toggle('scrolled', window.scrollY > 8); }
   window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  var ICO_MENU = '<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+  var ICO_CLOSE = '<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  function setMenu(open) {
+    var m = document.querySelector('#mmenu');
+    var h = document.querySelector('[data-menu-toggle]');
+    if (!m || !h) return;
+    m.classList.toggle('on', !!open);
+    h.classList.toggle('open', !!open);
+    h.setAttribute('aria-expanded', open ? 'true' : 'false');
+    h.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+    try { h.innerHTML = open ? ICO_CLOSE : ICO_MENU; } catch (e) {}
+    if (nav) nav.classList.toggle('menu-open', !!open);
+    document.body.classList.toggle('menu-open', !!open);
+  }
+  function isMenuOpen() {
+    var m = document.querySelector('#mmenu');
+    return !!(m && m.classList.contains('on'));
+  }
   document.addEventListener('click', function (ev) {
     var h = ev.target.closest('[data-menu-toggle]');
-    if (h) {
-      var m = document.querySelector(h.getAttribute('data-menu-toggle'));
-      if (m) { var open = m.classList.toggle('on'); h.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+    if (h) { ev.preventDefault(); setMenu(!isMenuOpen()); return; }
+    if (isMenuOpen()) {
+      var m = document.querySelector('#mmenu');
+      // Klik tautan di dalam menu: tutup agar transisi terasa rapi.
+      if (ev.target.closest('#mmenu a')) { setMenu(false); return; }
+      // Klik di luar header saat menu terbuka (pada lapisan dim): tutup.
+      if (m && nav && !ev.target.closest('.site-nav')) { setMenu(false); }
     }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if ((ev.key === 'Escape' || ev.key === 'Esc') && isMenuOpen()) setMenu(false);
+  });
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 860 && isMenuOpen()) setMenu(false);
   });
 
   /* ---------- REVEAL on scroll ---------- */
@@ -158,6 +190,14 @@
     inp.addEventListener('input', function () {
       inp.value = stripID(inp.value);
       try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {}
+    });
+  });
+  // Klik strip +62 ikut memfokuskan kolom ketik.
+  document.querySelectorAll('.phone-field').forEach(function (pf) {
+    pf.addEventListener('click', function (ev) {
+      if (ev.target.closest('input')) return;
+      var inp = pf.querySelector('input');
+      if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); } }
     });
   });
   // Saat submit: kirim bentuk lengkap +62xxxxxxxxxx ke server.

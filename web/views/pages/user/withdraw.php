@@ -2,7 +2,7 @@
 <?php if ($error): ?><div class="alert err"><?= e($error) ?></div><?php endif; ?>
 <?php if ($ok): ?><div class="alert ok"><?= e($ok) ?></div><?php endif; ?>
 <div class="panel">
-  <h3>Tarik dana</h3>
+  <div class="dash-head"><span class="dash-ic"><?= icon('bank', 22) ?></span><div><h3>Tarik dana</h3><p>Ke bank &amp; e-wallet tersimpan · minimal <?= rupiah($min) ?>.</p></div></div>
   <form method="post" action="<?= url('withdraw') ?>" data-idem>
     <?= \App\Core\CSRF::field() ?>
     <input type="hidden" name="_idem" value="">
@@ -16,9 +16,15 @@
     <div class="field"><label for="pin">PIN transaksi</label><input id="pin" name="pin" type="password" inputmode="numeric" maxlength="6" required placeholder="••••••"></div>
     <button class="btn btn-primary btn-block" type="submit">Ajukan penarikan</button>
   </form>
+  <div class="info-note warn"><?= icon('clock', 18) ?><span>Penarikan <strong>diproses admin</strong> — pantau statusnya di <a href="<?= url('riwayat?kind=withdraw') ?>"><strong>Riwayat</strong></a>. Pastikan nama pemilik sesuai rekening.</span></div>
 </div>
 <div class="panel">
-  <h3>Tambah tujuan baru</h3>
+  <div class="dash-head"><span class="dash-ic"><?= icon('card', 22) ?></span><div><h3>Tujuan tersimpan</h3><p><?= count($dests) ?> tujuan · tambah baru di bawah.</p></div></div>
+  <?php if (!empty($dests)): ?>
+  <div class="chips" style="margin-bottom:0">
+    <?php foreach ($dests as $d): ?><span class="chip"><?= icon('bank', 15) ?> <?= e($d['label'] . ' • ' . $d['bank_account']) ?></span><?php endforeach; ?>
+  </div>
+  <?php endif; ?>
   <form method="post" action="<?= url('withdraw/tujuan') ?>">
     <?= \App\Core\CSRF::field() ?>
     <div class="grid2">
