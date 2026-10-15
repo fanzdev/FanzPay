@@ -7,9 +7,11 @@ use App\Core\Auth;
 use App\Core\CSRF;
 use App\Core\DB;
 use App\Core\Logger;
+use App\Core\RateLimiter;
 use App\Core\Validator;
 use App\Core\View;
 use App\Services\DepositService;
+use App\Services\MidtransService;
 use App\Services\NotificationService;
 use App\Services\PinService;
 use App\Services\PpobService;
@@ -86,12 +88,24 @@ final class UserController {
     }
 
     public function deposit(): void {
-        $this->base('user/deposit', ['title' => 'Deposit', 'nav' => 'deposit', 'error' => flash('error'), 'min' => Settings::int('min_deposit', 10000), 'max' => Settings::int('max_deposit', 5000000)]);
+        $this->base('user/deposit', [
+            'title' => 'Deposit', 'nav' => 'deposit',
+            'error' => flash('error'), 'ok' => flash('ok'),
+            'min' => Settings::int('min_deposit', 10000),
+            'max' => Settings::int('max_deposit', 5000000),
+            'methods' => MidtransService::enabledMethods(),
+            'exp_min' => MidtransService::expiryMinutes(),
+            'deposit_enabled' => MidtransService::enabled(),
+            'pending' => DB::all("SELECT reference_id, payment_type, total_amount, status, expired_at FROM deposits WHERE user_id=? AND status='pending' AND (expired_at IS NULL OR expired_at > NOW()) ORDER BY id DESC LIMIT 3", [(int)$this->u['id']]),
+        ]);
     }
 
     public function doDeposit(): void {
         if (!CSRF::check($_POST['_csrf'] ?? null)) { flash('error', 'Sesi kedaluwarsa.'); redirect('deposit'); }
-        $r = DepositService::create((int)$this->u['id'], (int)($_POST['amount'] ?? 0), (string)($_POST['_idem'] ?? ''));
+        $rl = RateLimiter::hit('deposit:' . (int)$this->u['id'], 10, 3600);
+        if (!$rl['allowed']) { flash('error', 'Terlalu sering membuat deposit. Coba lagi nanti.'); redirect('deposit'); }
+        $method = strtolower(trim((string)($_POST['method'] ?? 'qris')));
+        $r = DepositService::create((int)$this->u['id'], (int)($_POST['amount'] ?? 0), (string)($_POST['_idem'] ?? ''), $method);
         if (!$r['ok']) { flash('error', $r['message']); redirect('deposit'); }
         redirect('deposit/' . $r['deposit']['reference_id']);
     }
@@ -99,7 +113,25 @@ final class UserController {
     public function depositShow(string $ref): void {
         $d = DB::one('SELECT * FROM deposits WHERE reference_id=? AND user_id=?', [$ref, (int)$this->u['id']]);
         if (!$d) { http_response_code(404); redirect('deposit'); }
-        $this->base('user/deposit-show', ['title' => 'Bayar Deposit', 'nav' => 'deposit', 'd' => $d]);
+        if (($d['status'] ?? '') === 'pending' && !empty($d['expired_at']) && strtotime((string)$d['expired_at']) < time()) {
+            DB::exec("UPDATE deposits SET status='expired' WHERE reference_id=? AND status='pending'", [$ref]);
+            DB::exec("UPDATE transactions SET status='expired' WHERE reference_id=?", [$ref]);
+            $d['status'] = 'expired';
+        }
+        $method = (string)($d['payment_type'] ?? 'qris');
+        $this->base('user/deposit-show', [
+            'title' => 'Bayar Deposit', 'nav' => 'deposit', 'd' => $d,
+            'method_label' => MidtransService::METHODS[$method]['label'] ?? strtoupper($method),
+            'method_kind' => MidtransService::METHODS[$method]['kind'] ?? 'qris',
+            'is_mock' => !empty($d['is_mock']),
+        ]);
+    }
+
+    /** Polling status aman: status final selalu dari backend. */
+    public function depositStatusJson(string $ref): void {
+        $d = DB::one('SELECT reference_id, status, amount, fee, total_amount, payment_type, expired_at, paid_at FROM deposits WHERE reference_id=? AND user_id=?', [$ref, (int)$this->u['id']]);
+        if (!$d) json_response(['ok' => false, 'message' => 'Tidak ditemukan.'], 404);
+        json_response(['ok' => true, 'data' => $d]);
     }
 
     public function withdraw(): void {

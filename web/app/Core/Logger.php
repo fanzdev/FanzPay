@@ -15,7 +15,7 @@ final class Logger {
 
     /** @param array<string,mixed> $ctx */
     public static function scrub(array $ctx): array {
-        $deny = ['password', 'pin', 'secret_token', 'secret', 'signing_secret', 'api_key', 'otp', 'wd_pin', 'authorization', 'token'];
+        $deny = ['password', 'pin', 'secret_token', 'secret', 'signing_secret', 'api_key', 'otp', 'wd_pin', 'authorization', 'token', 'server_key', 'client_key', 'midtrans_server', 'midtrans_client'];
         foreach ($ctx as $k => $v) {
             $lk = strtolower((string)$k);
             foreach ($deny as $d) {

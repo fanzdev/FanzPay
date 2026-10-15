@@ -91,6 +91,12 @@ return [
         'base_url'  => env('DIGIFLAZZ_BASE_URL', 'https://api.digiflazz.com/v1'),
         'sandbox'   => filter_var(env('DIGIFLAZZ_SANDBOX', true), FILTER_VALIDATE_BOOLEAN),
     ],
+    'midtrans' => [
+        // Server-side only. Jangan pernah kirim ke browser.
+        'server_key' => env('MIDTRANS_SERVER_KEY', ''),
+        'client_key' => env('MIDTRANS_CLIENT_KEY', ''),
+        'mode'       => strtolower((string)env('MIDTRANS_MODE', 'sandbox')) === 'production' ? 'production' : 'sandbox',
+    ],
     'mail' => [
         'from'      => env('MAIL_FROM', 'noreply@fanzpay.local'),
         'from_name' => env('MAIL_FROM_NAME', 'FanzPay'),

@@ -139,6 +139,7 @@ $router->post('/transfer', ['UserController', 'doTransfer']);
 $router->get('/deposit', ['UserController', 'deposit']);
 $router->post('/deposit', ['UserController', 'doDeposit']);
 $router->get('/deposit/{ref}', ['UserController', 'depositShow']);
+$router->get('/deposit/{ref}/status', ['UserController', 'depositStatusJson']);
 $router->get('/withdraw', ['UserController', 'withdraw']);
 $router->post('/withdraw/tujuan', ['UserController', 'doWithdrawDest']);
 $router->post('/withdraw', ['UserController', 'doWithdraw']);
@@ -178,6 +179,9 @@ $router->get('/admin/pengaturan', ['AdminController', 'settings']);
 $router->post('/admin/pengaturan', ['AdminController', 'settings']);
 $router->get('/admin/api', ['AdminController', 'apiConfig']);
 $router->post('/admin/api', ['AdminController', 'apiConfig']);
+$router->post('/admin/api/midtrans-test', ['AdminController', 'midtransTest']);
+$router->post('/admin/deposit/{ref}/sync', ['AdminController', 'depositSync']);
+$router->post('/admin/deposit/{ref}/simulate', ['AdminController', 'depositSimulate']);
 
 // API JSON
 $router->post('/api/auth/login', ['ApiController', 'login']);
@@ -198,6 +202,7 @@ $router->post('/api/pin', ['ApiController', 'setPin']);
 // Webhook
 $router->post('/webhooks/buatqris', ['WebhookController', 'buatqris']);
 $router->post('/webhooks/digiflazz', ['WebhookController', 'digiflazz']);
+$router->post('/webhooks/midtrans', ['WebhookController', 'midtrans']);
 
 $match = $router->match($_SERVER['REQUEST_METHOD'] ?? 'GET', $path);
 if (!$match) {

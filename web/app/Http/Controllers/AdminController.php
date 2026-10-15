@@ -136,8 +136,32 @@ final class AdminController {
 
     public function deposits(): void {
         $this->need('deposits.view');
-        $rows = DB::all('SELECT d.*, u.name FROM deposits d JOIN users u ON u.id=d.user_id ORDER BY d.id DESC LIMIT 100');
-        $this->base('admin/deposits', ['title' => 'Deposit', 'nav' => 'deposits', 'rows' => $rows]);
+        $q = trim((string)($_GET['q'] ?? ''));
+        $st = trim((string)($_GET['status'] ?? ''));
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $per = 20;
+        $off = ($page - 1) * $per;
+        $hasGw = self::hasColumn('deposits', 'gateway');
+        $sel = $hasGw ? 'd.*, u.name' : 'd.*, u.name';
+        $sql = "SELECT {$sel} FROM deposits d JOIN users u ON u.id=d.user_id";
+        $cond = [];
+        $p = [];
+        if ($q !== '') { $cond[] = '(d.reference_id LIKE ? OR u.name LIKE ? OR u.email LIKE ?)'; $p[] = "%{$q}%"; $p[] = "%{$q}%"; $p[] = "%{$q}%"; }
+        if (in_array($st, ['pending', 'success', 'expired', 'failed'], true)) { $cond[] = 'd.status = ?'; $p[] = $st; }
+        if ($cond) $sql .= ' WHERE ' . implode(' AND ', $cond);
+        $total = (int)(DB::one('SELECT COUNT(*) c FROM deposits d JOIN users u ON u.id=d.user_id' . ($cond ? ' WHERE ' . implode(' AND ', $cond) : ''), $p)['c'] ?? 0);
+        $rows = DB::all($sql . ' ORDER BY d.id DESC LIMIT ' . $per . ' OFFSET ' . $off, $p);
+        $this->base('admin/deposits', ['title' => 'Deposit', 'nav' => 'deposits', 'rows' => $rows, 'q' => $q, 'status' => $st, 'page' => $page, 'pages' => max(1, (int)ceil($total / $per)), 'has_gateway' => $hasGw, 'ok' => flash('ok'), 'error' => flash('error')]);
+    }
+
+    private static function hasColumn(string $table, string $col): bool {
+        static $cache = [];
+        $k = $table . '.' . $col;
+        if (isset($cache[$k])) return $cache[$k];
+        try {
+            foreach (DB::all("SHOW COLUMNS FROM `{$table}` LIKE ?", [$col]) as $r) { $cache[$k] = true; return true; }
+        } catch (\Throwable $e) {}
+        return $cache[$k] = false;
     }
 
     public function withdrawals(): void {
@@ -209,6 +233,9 @@ final class AdminController {
     public function reconcile(): void {
         $this->need('reconcile.manage');
         $data = ReconcileService::overview();
+        $data['midtrans_pending'] = ReconcileService::midtransPending();
+        $data['midtrans_mode'] = \App\Providers\MidtransClient::resolveConfig()['mode'];
+        $data['midtrans_ready'] = strlen(\App\Providers\MidtransClient::resolveConfig()['server_key']) >= 20;
         // aksi: refund paksa transaksi PPOB gagal yang masih pending > 60 mnt
         $this->base('admin/reconcile', ['title' => 'Rekonsiliasi', 'nav' => 'reconcile', 'data' => $data, 'ok' => flash('ok')]);
     }
@@ -242,15 +269,37 @@ final class AdminController {
         if (is_post()) {
             if (!$this->super) redirect('admin');
             if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/pengaturan');
-            foreach (['site_name', 'min_deposit', 'max_deposit', 'min_withdraw', 'max_withdraw', 'min_transfer', 'max_transfer', 'provider_mode'] as $k) {
-                if (isset($_POST[$k])) Settings::set($k, trim((string)$_POST[$k]), (int)$this->u['id']);
+            foreach (['site_name', 'min_deposit', 'max_deposit', 'min_withdraw', 'max_withdraw', 'min_transfer', 'max_transfer', 'provider_mode', 'deposit_gateway', 'deposit_methods', 'deposit_expiry_minutes', 'midtrans_mode', 'midtrans_fee_qris_pct', 'midtrans_fee_bca', 'midtrans_fee_bri', 'midtrans_fee_bni', 'midtrans_fee_mandiri', 'midtrans_fee_permata', 'midtrans_fee_gopay_pct', 'midtrans_fee_shopeepay_pct'] as $k) {
+                if (isset($_POST[$k])) {
+                    $v = trim((string)$_POST[$k]);
+                    // Validasi keras kebijakan deposit di backend.
+                    if (in_array($k, ['min_deposit', 'max_deposit'], true)) {
+                        $iv = (int)$v;
+                        if ($k === 'min_deposit' && $iv < 10000) { flash('error', 'Minimal deposit tidak boleh di bawah Rp 10.000.'); redirect('admin/pengaturan'); }
+                        if ($iv < 0) { flash('error', 'Nominal tidak valid.'); redirect('admin/pengaturan'); }
+                    }
+                    if ($k === 'deposit_methods') {
+                        $allow = array_keys(\App\Services\MidtransService::METHODS);
+                        $picked = array_values(array_intersect(array_map('trim', explode(',', strtolower($v))), $allow));
+                        if ($picked === []) { flash('error', 'Pilih minimal satu metode pembayaran.'); redirect('admin/pengaturan'); }
+                        $v = implode(',', $picked);
+                    }
+                    if ($k === 'deposit_expiry_minutes') {
+                        $iv = (int)$v;
+                        if ($iv < 5 || $iv > 60) { flash('error', 'Masa berlaku 5–60 menit.'); redirect('admin/pengaturan'); }
+                    }
+                    if ($k === 'deposit_gateway' && !in_array($v, ['midtrans', 'buatqris'], true)) { flash('error', 'Gateway tidak valid.'); redirect('admin/pengaturan'); }
+                    if ($k === 'midtrans_mode' && !in_array($v, ['sandbox', 'production'], true)) { flash('error', 'Mode Midtrans tidak valid.'); redirect('admin/pengaturan'); }
+                    Settings::set($k, $v, (int)$this->u['id']);
+                }
             }
             Settings::set('maintenance_mode', isset($_POST['maintenance_mode']) ? '1' : '0', (int)$this->u['id']);
+            Settings::set('deposit_enabled', isset($_POST['deposit_enabled']) ? '1' : '0', (int)$this->u['id']);
             Logger::audit((int)$this->u['id'], 'super_admin', 'settings.update', 'system_settings', null);
             flash('ok', 'Pengaturan disimpan.');
             redirect('admin/pengaturan');
         }
-        $this->base('admin/settings', ['title' => 'Pengaturan', 'nav' => 'settings', 's' => Settings::all(), 'ok' => flash('ok')]);
+        $this->base('admin/settings', ['title' => 'Pengaturan', 'nav' => 'settings', 's' => Settings::all(), 'ok' => flash('ok'), 'error' => flash('error')]);
     }
 
     public function apiConfig(): void {
@@ -266,12 +315,85 @@ final class AdminController {
                 $v = trim((string)($_POST[$field] ?? ''));
                 if ($v !== '' && $v !== '••••••••') Settings::set($field, $v, (int)$this->u['id']);
             }
+            // Midtrans: non-rahasia langsung simpan; secret hanya bila diisi (masking di view).
+            if (isset($_POST['midtrans_mode']) && in_array($_POST['midtrans_mode'], ['sandbox', 'production'], true)) {
+                Settings::set('midtrans_mode', (string)$_POST['midtrans_mode'], (int)$this->u['id']);
+            }
+            foreach (['midtrans_server_key' => 1, 'midtrans_client_key' => 1] as $field => $x) {
+                $v = trim((string)($_POST[$field] ?? ''));
+                if ($v !== '' && $v !== '••••••••') {
+                    if (strlen($v) < 20) { flash('error', 'Kunci Midtrans tampak tidak valid (terlalu pendek).'); redirect('admin/api'); }
+                    Settings::set($field, $v, (int)$this->u['id']);
+                }
+            }
             Logger::audit((int)$this->u['id'], 'super_admin', 'apiconfig.update', 'system_settings', null);
             flash('ok', 'Konfigurasi API disimpan.');
             redirect('admin/api');
         }
         $masked = [];
-        foreach (['buatqris_secret', 'buatqris_sign', 'digiflazz_key'] as $k) $masked[$k] = mask_secret(Settings::get($k, ''));
-        $this->base('admin/apiconfig', ['title' => 'Konfigurasi API', 'nav' => 'apiconfig', 's' => Settings::all(), 'masked' => $masked, 'ok' => flash('ok')]);
+        foreach (['buatqris_secret', 'buatqris_sign', 'digiflazz_key', 'midtrans_server_key', 'midtrans_client_key'] as $k) $masked[$k] = mask_secret(Settings::get($k, ''));
+        $cfg = \App\Providers\MidtransClient::resolveConfig();
+        $this->base('admin/apiconfig', [
+            'title' => 'Konfigurasi API', 'nav' => 'apiconfig', 's' => Settings::all(), 'masked' => $masked,
+            'ok' => flash('ok'), 'error' => flash('error'),
+            'midtrans_mode' => $cfg['mode'], 'midtrans_ready' => strlen($cfg['server_key']) >= 20,
+            'webhook_url' => url('webhooks/midtrans'),
+        ]);
+    }
+
+    /** Uji konektivitas Midtrans (super admin). Tidak membuat transaksi / dana. */
+    public function midtransTest(): void {
+        if (!$this->super) redirect('admin');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/api');
+        $r = (new \App\Providers\MidtransClient())->testConnection();
+        Logger::audit((int)$this->u['id'], 'super_admin', 'midtrans.test', 'system_settings', null, $r['ok'] ? 'ok' : 'fail');
+        flash($r['ok'] ? 'ok' : 'error', $r['message']);
+        redirect('admin/api');
+    }
+
+    /** Sinkronkan satu deposit pending via Status API resmi (super admin / deposits.manage). */
+    public function depositSync(string $ref): void {
+        $this->need('deposits.view');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/deposit');
+        $dep = DB::one('SELECT * FROM deposits WHERE reference_id=?', [$ref]);
+        if (!$dep) { flash('error', 'Deposit tidak ditemukan.'); redirect('admin/deposit'); }
+        if (($dep['gateway'] ?? 'midtrans') !== 'midtrans' || !empty($dep['is_mock'])) {
+            flash('error', 'Hanya deposit Midtrans non-mock yang bisa disinkronkan.');
+            redirect('admin/deposit');
+        }
+        $st = (new \App\Providers\MidtransClient())->status($ref);
+        if (!$st['ok']) {
+            Logger::audit((int)$this->u['id'], $this->u['role'], 'deposit.sync', 'deposits', $ref, 'fail', ['http' => $st['http'] ?? 0]);
+            flash('error', (string)($st['message'] ?? 'Gagal cek status.'));
+            redirect('admin/deposit');
+        }
+        $d = $st['data'];
+        $ts = (string)($d['transaction_status'] ?? 'unknown');
+        if (in_array($ts, ['settlement', 'capture'], true) && ($ts !== 'capture' || ($d['fraud_status'] ?? 'accept') === 'accept')) {
+            if ((int)($d['gross_amount'] ?? -1) !== (int)$dep['total_amount']) {
+                Logger::audit((int)$this->u['id'], $this->u['role'], 'deposit.sync', 'deposits', $ref, 'fail', ['reason' => 'amount-mismatch']);
+                flash('error', 'Nominal Midtrans tidak cocok — butuh tinjauan manual.');
+                redirect('admin/deposit');
+            }
+            \App\Services\MidtransService::applyNotification(array_merge($d, ['order_id' => $ref]));
+            flash('ok', 'Status Midtrans: ' . $ts . ' — saldo dikredit bila sah.');
+        } elseif ($ts === 'pending') {
+            flash('ok', 'Status Midtrans masih pending. Menunggu pembayaran.');
+        } else {
+            \App\Services\MidtransService::applyNotification(array_merge($d, ['order_id' => $ref]));
+            flash('ok', 'Status Midtrans: ' . $ts . ' — deposit diperbarui.');
+        }
+        Logger::audit((int)$this->u['id'], $this->u['role'], 'deposit.sync', 'deposits', $ref, 'ok', ['midtrans_status' => $ts]);
+        redirect('admin/deposit');
+    }
+
+    /** Simulasi sukses deposit MOCK sandbox (super admin). Transaksi nyata ditolak. */
+    public function depositSimulate(string $ref): void {
+        if (!$this->super) redirect('admin');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/deposit');
+        $r = \App\Services\MidtransService::simulateSuccess($ref);
+        Logger::audit((int)$this->u['id'], 'super_admin', 'deposit.simulate', 'deposits', $ref, $r['ok'] ? 'ok' : 'fail');
+        flash($r['ok'] ? 'ok' : 'error', $r['ok'] ? 'Simulasi sukses: saldo dikredit + ledger tercatat.' : (string)($r['message'] ?? 'Gagal.'));
+        redirect('admin/deposit');
     }
 }

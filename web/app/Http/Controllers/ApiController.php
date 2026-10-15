@@ -113,14 +113,16 @@ final class ApiController {
     public function deposit(): void {
         $u = $this->needUser();
         $in = json_input();
-        $r = DepositService::create((int)$u['id'], (int)($in['amount'] ?? 0), (string)($_SERVER['HTTP_X_IDEMPOTENCY_KEY'] ?? ''));
+        $rl = RateLimiter::hit('api-deposit:' . (int)$u['id'], 10, 3600);
+        if (!$rl['allowed']) json_response(['ok' => false, 'message' => 'Terlalu sering. Coba lagi nanti.'], 429);
+        $r = DepositService::create((int)$u['id'], (int)($in['amount'] ?? 0), (string)($_SERVER['HTTP_X_IDEMPOTENCY_KEY'] ?? ''), strtolower(trim((string)($in['method'] ?? 'qris'))));
         if (!$r['ok']) json_response(['ok' => false, 'message' => $r['message']], 422);
         json_response(['ok' => true, 'data' => $r['deposit']]);
     }
 
     public function depositStatus(string $ref): void {
         $u = $this->needUser();
-        $d = DB::one('SELECT reference_id, status, total_amount, qr_url, payment_url, expired_at FROM deposits WHERE reference_id=? AND user_id=?', [$ref, (int)$u['id']]);
+        $d = DB::one('SELECT reference_id, status, amount, fee, total_amount, payment_type, payment_code, qr_url, payment_url, expired_at, paid_at FROM deposits WHERE reference_id=? AND user_id=?', [$ref, (int)$u['id']]);
         if (!$d) json_response(['ok' => false, 'message' => 'Tidak ditemukan.'], 404);
         json_response(['ok' => true, 'data' => $d]);
     }

@@ -79,6 +79,16 @@ $settings = [
     'default_margin' => '1000',
     'provider_mode' => 'production',
     'transfer_fee' => '0',
+    'deposit_enabled' => '1',
+    'deposit_gateway' => 'midtrans',
+    'deposit_methods' => 'qris,bca,bri,mandiri,permata,bni,gopay,shopeepay',
+    'deposit_expiry_minutes' => '15',
+    'midtrans_mode' => 'sandbox',
+    'midtrans_fee_qris_pct' => '0.7',
+    'midtrans_fee_bca' => '4000', 'midtrans_fee_bri' => '4000',
+    'midtrans_fee_bni' => '4000', 'midtrans_fee_mandiri' => '4000',
+    'midtrans_fee_permata' => '4000',
+    'midtrans_fee_gopay_pct' => '2', 'midtrans_fee_shopeepay_pct' => '2',
 ];
 $st = $pdo->prepare('INSERT INTO system_settings (`key`,`value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `value`=IF(`value`="",VALUES(`value`),`value`)');
 foreach ($settings as $k => $v) $st->execute([$k, $v]);

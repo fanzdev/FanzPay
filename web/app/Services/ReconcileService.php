@@ -22,4 +22,15 @@ final class ReconcileService {
         }
         return ['pending_by_kind' => $pendingTx, 'old_pending' => $oldPending, 'webhooks_open' => $wh, 'balance_mismatch' => $mismatch];
     }
+
+    /** Deposit Midtrans pending untuk panel rekonsiliasi (schema-tolerant). */
+    public static function midtransPending(int $limit = 50): array {
+        try {
+            $cols = array_column(DB::all('SHOW COLUMNS FROM deposits'), 'Field');
+        } catch (\Throwable $e) { return []; }
+        if (!in_array('gateway', $cols, true)) {
+            return DB::all("SELECT reference_id, amount, total_amount, status, expired_at, created_at FROM deposits WHERE status='pending' ORDER BY id DESC LIMIT ?", [$limit]);
+        }
+        return DB::all("SELECT reference_id, payment_type, amount, fee, total_amount, status, expired_at, created_at, COALESCE(is_mock,0) is_mock FROM deposits WHERE gateway='midtrans' AND status='pending' ORDER BY id DESC LIMIT ?", [$limit]);
+    }
 }

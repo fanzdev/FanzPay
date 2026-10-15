@@ -8,12 +8,31 @@ use App\Core\Logger;
 use App\Providers\BuatQrisClient;
 
 /**
- * Deposit via BuatQris QRIS. Backend = sumber kebenaran.
- * Frontend hanya menampilkan status.
+ * Deposit facade.
+ * - Jalur utama: Midtrans Core API (QRIS, VA, e-wallet) via MidtransService.
+ * - Jalur legacy: BuatQris QRIS (dipertahankan agar fitur lama tidak rusak).
+ * Backend = sumber kebenaran. Frontend hanya menampilkan status.
  */
 final class DepositService {
     /** @return array{ok:bool, message?:string, deposit?:array} */
-    public static function create(int $userId, int $amount, string $idempotencyKey = ''): array {
+    public static function create(int $userId, int $amount, string $idempotencyKey = '', string $method = ''): array {
+        $gateway = Settings::get('deposit_gateway', 'midtrans');
+        if ($gateway === 'midtrans' || $method !== '') {
+            $customer = [];
+            try {
+                $u = DB::one('SELECT name, email, phone FROM users WHERE id=?', [$userId]);
+                if ($u) {
+                    $names = explode(' ', trim((string)$u['name']));
+                    $customer = ['first_name' => $names[0] ?? 'Pelanggan', 'email' => (string)$u['email'], 'phone' => (string)$u['phone']];
+                }
+            } catch (\Throwable $e) {}
+            return MidtransService::create($userId, $amount, $method !== '' ? $method : 'qris', $idempotencyKey, $customer);
+        }
+        return self::createLegacyBuatQris($userId, $amount, $idempotencyKey);
+    }
+
+    /** Jalur lama BuatQris — dipertahankan untuk kompatibilitas. */
+    public static function createLegacyBuatQris(int $userId, int $amount, string $idempotencyKey = ''): array {
         $min = Settings::int('min_deposit', 10000);
         $max = Settings::int('max_deposit', 5000000);
         if ($amount < $min) return ['ok' => false, 'message' => 'Minimal deposit ' . rupiah($min) . '.'];
@@ -43,7 +62,12 @@ final class DepositService {
                 $ref, $userId, 'deposit', $amount, (int)($d['admin_fee'] ?? 0), (int)($d['total_amount'] ?? $amount), $idempotencyKey !== '' ? $idempotencyKey : null, 'Deposit via QRIS', $d['transaction_id'] ?? null,
             ]);
             $txId = (int)$pdo->lastInsertId();
-            $pdo->prepare('INSERT INTO deposits (transaction_id, user_id, reference_id, provider_txn_id, amount, total_amount, fee, credit_amount, status, qr_url, payment_url, expired_at, is_mock) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')->execute([
+            $cols = self::depositColumns();
+            $gw = $cols['gateway'] ? ', gateway' : '';
+            $gv = $cols['gateway'] ? ", 'buatqris'" : '';
+            $pt = $cols['payment_type'] ? ', payment_type' : '';
+            $pv = $cols['payment_type'] ? ", 'qris'" : '';
+            $pdo->prepare("INSERT INTO deposits (transaction_id, user_id, reference_id, provider_txn_id, amount, total_amount, fee, credit_amount, status, qr_url, payment_url, expired_at, is_mock{$gw}{$pt}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?{$gv}{$pv})")->execute([
                 $txId, $userId, $ref, $d['transaction_id'] ?? null, $amount, (int)($d['total_amount'] ?? $amount),
                 (int)($d['admin_fee'] ?? 0), (int)($d['credit_amount'] ?? $amount), 'pending',
                 $d['qr_url'] ?? null, $d['payment_url'] ?? null, self::normDate($d['expired_at'] ?? null), $isMock,
@@ -58,8 +82,21 @@ final class DepositService {
         return ['ok' => true, 'deposit' => $dep];
     }
 
+    private static function depositColumns(): array {
+        static $c = null;
+        if ($c !== null) return $c;
+        $c = ['gateway' => false, 'payment_type' => false];
+        try {
+            foreach (DB::all('SHOW COLUMNS FROM deposits') as $row) {
+                if (($row['Field'] ?? '') === 'gateway') $c['gateway'] = true;
+                if (($row['Field'] ?? '') === 'payment_type') $c['payment_type'] = true;
+            }
+        } catch (\Throwable $e) {}
+        return $c;
+    }
+
     /**
-     * Terapkan webhook payment.* — IDEMPOTEN. Dipanggil setelah signature lolos.
+     * Terapkan webhook payment.* BuatQris — IDEMPOTEN. Dipanggil setelah signature lolos.
      * @return array{ok:bool, applied:bool}
      */
     public static function applyWebhook(array $payload): array {
