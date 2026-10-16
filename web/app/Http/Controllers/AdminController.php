@@ -17,28 +17,60 @@ use App\Services\Settings;
 use App\Services\WalletService;
 use App\Services\WithdrawService;
 
-/** Panel admin/super-admin dengan permission granular. */
-final class AdminController {
-    private array $u;
-    private bool $super;
+/** Panel admin/super-admin dengan permission granular.
+ * Dipakai lewat dua prefix: /admin (role admin) dan /superadmin (role super_admin)
+ * via subclass SuperAdminController. Semua URL/redirect memakai $this->panel. */
+class AdminController {
+    protected string $panel = 'admin';
+    protected array $u;
+    protected bool $super;
 
     public function __construct() {
         $u = Auth::user();
-        if (!$u || !Auth::isAdmin($u)) redirect('login');
+        if (!$u) redirect('login');
+        $role = (string)($u['role'] ?? '');
+        if ($this->panel === 'superadmin') {
+            // Prefix /superadmin khusus super_admin. Admin biasa digiring ke panelnya.
+            if ($role === 'admin') redirect($this->swapPanel('admin'));
+            if ($role !== 'super_admin') redirect('home');
+        } else {
+            // Prefix /admin khusus admin. Super admin digiring ke panelnya.
+            if ($role === 'super_admin') redirect($this->swapPanel('superadmin'));
+            if ($role !== 'admin') redirect('home');
+        }
         $this->u = $u;
         $this->super = Auth::isSuperAdmin($u);
+    }
+
+    /** Alihkan ke prefix panel lain dengan path yang sama (mis. /admin/deposit → /superadmin/deposit). */
+    protected function swapPanel(string $to): string {
+        $req = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+        $basePath = app_base()['path'];
+        if ($basePath !== '' && str_starts_with($req, $basePath)) $req = substr($req, strlen($basePath));
+        $req = '/' . trim($req, '/');
+        $from = $this->panel === 'superadmin' ? '/superadmin' : '/admin';
+        $rest = str_starts_with($req, $from) ? substr($req, strlen($from)) : '';
+        return trim($to . $rest, '/') === $to && $rest === '' ? $to : $to . $rest;
+    }
+
+    /** Daftar permission milik user ini (super admin = semua). */
+    protected function myPerms(): array {
+        if ($this->super) return Auth::PERMISSIONS;
+        try {
+            return array_column(DB::all('SELECT permission FROM admin_permissions WHERE admin_id = ?', [(int)$this->u['id']]), 'permission');
+        } catch (\Throwable $e) { return []; }
     }
 
     private function need(string $perm): void {
         if (!Auth::can($perm, $this->u)) {
             http_response_code(403);
-            View::render('admin/denied', ['title' => 'Akses ditolak', 'user' => $this->u, 'unread' => 0], 'admin');
+            View::render('admin/denied', ['title' => 'Akses ditolak', 'user' => $this->u, 'unread' => 0, 'panel' => $this->panel, 'my_perms' => $this->myPerms(), 'is_super' => $this->super], 'admin');
             exit;
         }
     }
 
     private function base(string $view, array $data = []): void {
-        $data += ['user' => $this->u, 'is_super' => $this->super, 'perms' => Auth::PERMISSIONS];
+        $data += ['user' => $this->u, 'is_super' => $this->super, 'perms' => Auth::PERMISSIONS, 'panel' => $this->panel, 'my_perms' => $this->myPerms()];
         View::render($view, $data, 'admin');
     }
 
@@ -72,7 +104,7 @@ final class AdminController {
 
     public function userToggle(string $id): void {
         $this->need('users.manage');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/pengguna');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/pengguna');
         $t = DB::one('SELECT * FROM users WHERE id=? AND role="user"', [(int)$id]);
         if ($t) {
             $ns = $t['status'] === 'active' ? 'suspended' : 'active';
@@ -80,7 +112,7 @@ final class AdminController {
             Logger::audit((int)$this->u['id'], $this->u['role'], 'admin.user.toggle', 'users', (int)$id, 'ok', ['to' => $ns]);
             flash('ok', 'Status pengguna diperbarui.');
         }
-        redirect('admin/pengguna');
+        redirect($this->panel . '/pengguna');
     }
 
     // ---- Admin management (super only) ----
@@ -93,10 +125,10 @@ final class AdminController {
     }
 
     public function adminStore(): void {
-        if (!$this->super) redirect('admin');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/admin');
+        if (!$this->super) redirect($this->panel);
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/admin');
         [$clean, $errors] = Validator::validate($_POST, ['name' => 'required|max:100', 'email' => 'required|email|max:190', 'password' => 'required|min:8']);
-        if ($errors || DB::one('SELECT id FROM users WHERE email=?', [$clean['email']])) { flash('error', 'Data admin tidak valid/sudah ada.'); redirect('admin/admin'); }
+        if ($errors || DB::one('SELECT id FROM users WHERE email=?', [$clean['email']])) { flash('error', 'Data admin tidak valid/sudah ada.'); redirect($this->panel . '/admin'); }
         $perms = array_intersect($_POST['perms'] ?? [], Auth::PERMISSIONS);
         DB::tx(function () use ($clean, $perms) {
             $pdo = DB::pdo();
@@ -107,12 +139,12 @@ final class AdminController {
         });
         Logger::audit((int)$this->u['id'], 'super_admin', 'admin.create', 'users', null);
         flash('ok', 'Admin dibuat.');
-        redirect('admin/admin');
+        redirect($this->panel . '/admin');
     }
 
     public function adminPerms(string $id): void {
-        if (!$this->super) redirect('admin');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/admin');
+        if (!$this->super) redirect($this->panel);
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/admin');
         $perms = array_intersect($_POST['perms'] ?? [], Auth::PERMISSIONS);
         DB::tx(function () use ($id, $perms) {
             DB::exec('DELETE FROM admin_permissions WHERE admin_id=?', [(int)$id]);
@@ -120,7 +152,7 @@ final class AdminController {
         });
         Logger::audit((int)$this->u['id'], 'super_admin', 'admin.perms', 'users', (int)$id, 'ok', ['perms' => $perms]);
         flash('ok', 'Permission admin diperbarui.');
-        redirect('admin/admin');
+        redirect($this->panel . '/admin');
     }
 
     // ---- Transactions / deposits / withdrawals ----
@@ -172,10 +204,10 @@ final class AdminController {
 
     public function withdrawalReject(string $ref): void {
         $this->need('withdrawals.manage');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/withdraw');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/withdraw');
         $w = DB::one('SELECT * FROM withdrawals WHERE reference_id=?', [$ref]);
         if ($w) { WithdrawService::reverse((int)$w['user_id'], $ref, 'Ditolak admin'); flash('ok', 'Withdrawal ditolak, saldo dikembalikan.'); }
-        redirect('admin/withdraw');
+        redirect($this->panel . '/withdraw');
     }
 
     // ---- Products & pricing ----
@@ -188,7 +220,7 @@ final class AdminController {
 
     public function priceSave(): void {
         $this->need('products.manage');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/produk');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/produk');
         $pid = (int)($_POST['product_id'] ?? 0);
         $sell = (int)($_POST['sell_price'] ?? 0);
         if ($pid > 0 && $sell > 0) {
@@ -197,24 +229,24 @@ final class AdminController {
             Logger::audit((int)$this->u['id'], $this->u['role'], 'pricing.update', 'products', $pid, 'ok', ['sell' => $sell]);
             flash('ok', 'Harga jual diperbarui.');
         }
-        redirect('admin/produk');
+        redirect($this->panel . '/produk');
     }
 
     public function productToggle(string $id): void {
         $this->need('products.manage');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/produk');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/produk');
         DB::exec('UPDATE products SET is_active = 1 - is_active WHERE id=?', [(int)$id]);
         Logger::audit((int)$this->u['id'], $this->u['role'], 'product.toggle', 'products', (int)$id);
-        redirect('admin/produk');
+        redirect($this->panel . '/produk');
     }
 
     public function syncProducts(): void {
         $this->need('products.manage');
         $r = \App\Services\CatalogSyncService::syncPrepaid();
-        if (!$r['ok']) { flash('error', (string)$r['message']); redirect('admin/produk'); }
+        if (!$r['ok']) { flash('error', (string)$r['message']); redirect($this->panel . '/produk'); }
         Logger::audit((int)$this->u['id'], $this->u['role'], 'product.sync', 'providers', 'digiflazz', 'ok', ['skus' => $r['skus'], 'active' => $r['active']]);
         flash('ok', "Sinkronisasi DigiFlazz selesai: {$r['skus']} SKU, {$r['active']} aktif.");
-        redirect('admin/produk');
+        redirect($this->panel . '/produk');
     }
 
     // ---- Reports / audit / reconcile / notifications / settings ----
@@ -242,16 +274,16 @@ final class AdminController {
 
     public function reconcileRefund(string $ref): void {
         $this->need('reconcile.manage');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/rekonsiliasi');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/rekonsiliasi');
         $t = DB::one('SELECT * FROM transactions WHERE reference_id=?', [$ref]);
         if ($t && $t['kind'] === 'ppob') { PpobService::refund((int)$t['user_id'], $ref, 'Refund manual via rekonsiliasi'); flash('ok', 'Refund diproses.'); }
-        redirect('admin/rekonsiliasi');
+        redirect($this->panel . '/rekonsiliasi');
     }
 
     public function notifications(): void {
         $this->need('notifications.manage');
         if (is_post()) {
-            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/notifikasi');
+            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/notifikasi');
             [$clean, $errors] = Validator::validate($_POST, ['title' => 'required|max:150', 'body' => 'required|max:255']);
             if (!$errors) {
                 $users = DB::all('SELECT id FROM users WHERE role="user" AND status="active"');
@@ -259,7 +291,7 @@ final class AdminController {
                 Logger::audit((int)$this->u['id'], $this->u['role'], 'notify.broadcast', 'notifications', null);
                 flash('ok', 'Pengumuman terkirim ke ' . count($users) . ' pengguna.');
             } else flash('error', reset($errors));
-            redirect('admin/notifikasi');
+            redirect($this->panel . '/notifikasi');
         }
         $this->base('admin/notifications', ['title' => 'Notifikasi', 'nav' => 'notifications', 'ok' => flash('ok'), 'error' => flash('error')]);
     }
@@ -267,29 +299,29 @@ final class AdminController {
     public function settings(): void {
         if (!$this->super) $this->need('settings.manage');
         if (is_post()) {
-            if (!$this->super) redirect('admin');
-            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/pengaturan');
+            if (!$this->super) redirect($this->panel);
+            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/pengaturan');
             foreach (['site_name', 'min_deposit', 'max_deposit', 'min_withdraw', 'max_withdraw', 'min_transfer', 'max_transfer', 'provider_mode', 'deposit_gateway', 'deposit_methods', 'deposit_expiry_minutes', 'midtrans_mode', 'midtrans_fee_qris_pct', 'midtrans_fee_bca', 'midtrans_fee_bri', 'midtrans_fee_bni', 'midtrans_fee_mandiri', 'midtrans_fee_permata', 'midtrans_fee_gopay_pct', 'midtrans_fee_shopeepay_pct'] as $k) {
                 if (isset($_POST[$k])) {
                     $v = trim((string)$_POST[$k]);
                     // Validasi keras kebijakan deposit di backend.
                     if (in_array($k, ['min_deposit', 'max_deposit'], true)) {
                         $iv = (int)$v;
-                        if ($k === 'min_deposit' && $iv < 10000) { flash('error', 'Minimal deposit tidak boleh di bawah Rp 10.000.'); redirect('admin/pengaturan'); }
-                        if ($iv < 0) { flash('error', 'Nominal tidak valid.'); redirect('admin/pengaturan'); }
+                        if ($k === 'min_deposit' && $iv < 10000) { flash('error', 'Minimal deposit tidak boleh di bawah Rp 10.000.'); redirect($this->panel . '/pengaturan'); }
+                        if ($iv < 0) { flash('error', 'Nominal tidak valid.'); redirect($this->panel . '/pengaturan'); }
                     }
                     if ($k === 'deposit_methods') {
                         $allow = array_keys(\App\Services\MidtransService::METHODS);
                         $picked = array_values(array_intersect(array_map('trim', explode(',', strtolower($v))), $allow));
-                        if ($picked === []) { flash('error', 'Pilih minimal satu metode pembayaran.'); redirect('admin/pengaturan'); }
+                        if ($picked === []) { flash('error', 'Pilih minimal satu metode pembayaran.'); redirect($this->panel . '/pengaturan'); }
                         $v = implode(',', $picked);
                     }
                     if ($k === 'deposit_expiry_minutes') {
                         $iv = (int)$v;
-                        if ($iv < 5 || $iv > 60) { flash('error', 'Masa berlaku 5–60 menit.'); redirect('admin/pengaturan'); }
+                        if ($iv < 5 || $iv > 60) { flash('error', 'Masa berlaku 5–60 menit.'); redirect($this->panel . '/pengaturan'); }
                     }
-                    if ($k === 'deposit_gateway' && !in_array($v, ['midtrans', 'buatqris'], true)) { flash('error', 'Gateway tidak valid.'); redirect('admin/pengaturan'); }
-                    if ($k === 'midtrans_mode' && !in_array($v, ['sandbox', 'production'], true)) { flash('error', 'Mode Midtrans tidak valid.'); redirect('admin/pengaturan'); }
+                    if ($k === 'deposit_gateway' && !in_array($v, ['midtrans', 'buatqris'], true)) { flash('error', 'Gateway tidak valid.'); redirect($this->panel . '/pengaturan'); }
+                    if ($k === 'midtrans_mode' && !in_array($v, ['sandbox', 'production'], true)) { flash('error', 'Mode Midtrans tidak valid.'); redirect($this->panel . '/pengaturan'); }
                     Settings::set($k, $v, (int)$this->u['id']);
                 }
             }
@@ -297,15 +329,62 @@ final class AdminController {
             Settings::set('deposit_enabled', isset($_POST['deposit_enabled']) ? '1' : '0', (int)$this->u['id']);
             Logger::audit((int)$this->u['id'], 'super_admin', 'settings.update', 'system_settings', null);
             flash('ok', 'Pengaturan disimpan.');
-            redirect('admin/pengaturan');
+            redirect($this->panel . '/pengaturan');
         }
         $this->base('admin/settings', ['title' => 'Pengaturan', 'nav' => 'settings', 's' => Settings::all(), 'ok' => flash('ok'), 'error' => flash('error')]);
     }
 
-    public function apiConfig(): void {
-        if (!$this->super) { $this->need('apiconfig.manage'); if (!$this->super) redirect('admin'); }
+    // ---- MCP Server (super admin only) ----
+    public function mcp(): void {
+        if (!$this->super) redirect($this->panel);
+        \App\Mcp\McpAuth::ensureTables();
         if (is_post()) {
-            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/api');
+            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/mcp');
+            Settings::set('mcp_enabled', isset($_POST['mcp_enabled']) ? '1' : '0', (int)$this->u['id']);
+            Settings::set('mcp_max_per_tx', (string)max(0, (int)($_POST['mcp_max_per_tx'] ?? 100000)), (int)$this->u['id']);
+            Settings::set('mcp_max_daily', (string)max(0, (int)($_POST['mcp_max_daily'] ?? 500000)), (int)$this->u['id']);
+            $cats = strtolower(trim((string)($_POST['mcp_allowed_categories'] ?? '')));
+            Settings::set('mcp_allowed_categories', $cats !== '' ? $cats : 'pulsa,data,pln,emoney,game', (int)$this->u['id']);
+            $rl = (int)($_POST['mcp_rate_per_min'] ?? 60);
+            Settings::set('mcp_rate_per_min', (string)min(600, max(10, $rl)), (int)$this->u['id']);
+            $want = is_array($_POST['tools'] ?? null) ? $_POST['tools'] : [];
+            foreach (array_keys(\App\Mcp\McpTools::definitions()) as $t) {
+                Settings::set('mcp_tool_' . $t, in_array($t, $want, true) ? '1' : '0', (int)$this->u['id']);
+            }
+            Logger::audit((int)$this->u['id'], 'super_admin', 'mcp.settings.update', 'system_settings', null);
+            flash('ok', 'Pengaturan MCP disimpan & ditegakkan backend.');
+            redirect($this->panel . '/mcp');
+        }
+        $tokens = [];
+        try {
+            $tokens = DB::all('SELECT t.*, u.email FROM mcp_tokens t JOIN users u ON u.id=t.user_id WHERE t.revoked_at IS NULL AND t.expires_at > NOW() ORDER BY t.id DESC LIMIT 20');
+        } catch (\Throwable $e) {}
+        try {
+            $usage = DB::all("SELECT DATE(created_at) d, COUNT(*) c FROM audit_logs WHERE action LIKE 'mcp.tool.%' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) GROUP BY DATE(created_at) ORDER BY d");
+        } catch (\Throwable $e) { $usage = []; }
+        try {
+            $pending = DB::all("SELECT t.reference_id, t.total, t.created_at, u.email FROM transactions t JOIN users u ON u.id=t.user_id WHERE t.kind='ppob' AND t.status IN ('pending','processing') AND t.note LIKE '%[mcp]%' ORDER BY t.id DESC LIMIT 20");
+        } catch (\Throwable $e) { $pending = []; }
+        $this->base('admin/mcp', ['title' => 'MCP Server', 'nav' => 'mcp', 's' => Settings::all(), 'tools' => array_keys(\App\Mcp\McpTools::definitions()), 'tokens' => $tokens, 'usage' => $usage, 'pending' => $pending, 'ok' => flash('ok'), 'error' => flash('error')]);
+    }
+
+    public function mcpRevoke(string $id): void {
+        if (!$this->super) redirect($this->panel);
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/mcp');
+        try {
+            $t = DB::one('SELECT user_id FROM mcp_tokens WHERE id = ?', [(int)$id]);
+            DB::exec('UPDATE mcp_tokens SET revoked_at = NOW() WHERE id = ?', [(int)$id]);
+            if ($t) \App\Services\NotificationService::send((int)$t['user_id'], 'mcp', 'Akses AI dicabut admin', 'Koneksi AI Anda dicabut administrator.');
+            Logger::audit((int)$this->u['id'], 'super_admin', 'mcp.token.revoke', 'mcp_tokens', (int)$id);
+            flash('ok', 'Koneksi dicabut.');
+        } catch (\Throwable $e) { flash('error', 'Gagal mencabut.'); }
+        redirect($this->panel . '/mcp');
+    }
+
+    public function apiConfig(): void {
+        if (!$this->super) { $this->need('apiconfig.manage'); if (!$this->super) redirect($this->panel); }
+        if (is_post()) {
+            if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/api');
             // Simpan ke system_settings (terpisah dari .env agar bisa diatur via panel;
             // .env tetap prioritas bila terisi — lihat index.php wiring).
             foreach (['buatqris_account' => 'account', 'buatqris_wd_account' => 'wd', 'digiflazz_user' => 'user'] as $field => $x) {
@@ -322,13 +401,13 @@ final class AdminController {
             foreach (['midtrans_server_key' => 1, 'midtrans_client_key' => 1] as $field => $x) {
                 $v = trim((string)($_POST[$field] ?? ''));
                 if ($v !== '' && $v !== '••••••••') {
-                    if (strlen($v) < 20) { flash('error', 'Kunci Midtrans tampak tidak valid (terlalu pendek).'); redirect('admin/api'); }
+                    if (strlen($v) < 20) { flash('error', 'Kunci Midtrans tampak tidak valid (terlalu pendek).'); redirect($this->panel . '/api'); }
                     Settings::set($field, $v, (int)$this->u['id']);
                 }
             }
             Logger::audit((int)$this->u['id'], 'super_admin', 'apiconfig.update', 'system_settings', null);
             flash('ok', 'Konfigurasi API disimpan.');
-            redirect('admin/api');
+            redirect($this->panel . '/api');
         }
         $masked = [];
         foreach (['buatqris_secret', 'buatqris_sign', 'digiflazz_key', 'midtrans_server_key', 'midtrans_client_key'] as $k) $masked[$k] = mask_secret(Settings::get($k, ''));
@@ -343,29 +422,29 @@ final class AdminController {
 
     /** Uji konektivitas Midtrans (super admin). Tidak membuat transaksi / dana. */
     public function midtransTest(): void {
-        if (!$this->super) redirect('admin');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/api');
+        if (!$this->super) redirect($this->panel);
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/api');
         $r = (new \App\Providers\MidtransClient())->testConnection();
         Logger::audit((int)$this->u['id'], 'super_admin', 'midtrans.test', 'system_settings', null, $r['ok'] ? 'ok' : 'fail');
         flash($r['ok'] ? 'ok' : 'error', $r['message']);
-        redirect('admin/api');
+        redirect($this->panel . '/api');
     }
 
     /** Sinkronkan satu deposit pending via Status API resmi (super admin / deposits.manage). */
     public function depositSync(string $ref): void {
         $this->need('deposits.view');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/deposit');
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/deposit');
         $dep = DB::one('SELECT * FROM deposits WHERE reference_id=?', [$ref]);
-        if (!$dep) { flash('error', 'Deposit tidak ditemukan.'); redirect('admin/deposit'); }
+        if (!$dep) { flash('error', 'Deposit tidak ditemukan.'); redirect($this->panel . '/deposit'); }
         if (($dep['gateway'] ?? 'midtrans') !== 'midtrans' || !empty($dep['is_mock'])) {
             flash('error', 'Hanya deposit Midtrans non-mock yang bisa disinkronkan.');
-            redirect('admin/deposit');
+            redirect($this->panel . '/deposit');
         }
         $st = (new \App\Providers\MidtransClient())->status($ref);
         if (!$st['ok']) {
             Logger::audit((int)$this->u['id'], $this->u['role'], 'deposit.sync', 'deposits', $ref, 'fail', ['http' => $st['http'] ?? 0]);
             flash('error', (string)($st['message'] ?? 'Gagal cek status.'));
-            redirect('admin/deposit');
+            redirect($this->panel . '/deposit');
         }
         $d = $st['data'];
         $ts = (string)($d['transaction_status'] ?? 'unknown');
@@ -373,7 +452,7 @@ final class AdminController {
             if ((int)($d['gross_amount'] ?? -1) !== (int)$dep['total_amount']) {
                 Logger::audit((int)$this->u['id'], $this->u['role'], 'deposit.sync', 'deposits', $ref, 'fail', ['reason' => 'amount-mismatch']);
                 flash('error', 'Nominal Midtrans tidak cocok — butuh tinjauan manual.');
-                redirect('admin/deposit');
+                redirect($this->panel . '/deposit');
             }
             \App\Services\MidtransService::applyNotification(array_merge($d, ['order_id' => $ref]));
             flash('ok', 'Status Midtrans: ' . $ts . ' — saldo dikredit bila sah.');
@@ -384,16 +463,16 @@ final class AdminController {
             flash('ok', 'Status Midtrans: ' . $ts . ' — deposit diperbarui.');
         }
         Logger::audit((int)$this->u['id'], $this->u['role'], 'deposit.sync', 'deposits', $ref, 'ok', ['midtrans_status' => $ts]);
-        redirect('admin/deposit');
+        redirect($this->panel . '/deposit');
     }
 
     /** Simulasi sukses deposit MOCK sandbox (super admin). Transaksi nyata ditolak. */
     public function depositSimulate(string $ref): void {
-        if (!$this->super) redirect('admin');
-        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect('admin/deposit');
+        if (!$this->super) redirect($this->panel);
+        if (!CSRF::check($_POST['_csrf'] ?? null)) redirect($this->panel . '/deposit');
         $r = \App\Services\MidtransService::simulateSuccess($ref);
         Logger::audit((int)$this->u['id'], 'super_admin', 'deposit.simulate', 'deposits', $ref, $r['ok'] ? 'ok' : 'fail');
         flash($r['ok'] ? 'ok' : 'error', $r['ok'] ? 'Simulasi sukses: saldo dikredit + ledger tercatat.' : (string)($r['message'] ?? 'Gagal.'));
-        redirect('admin/deposit');
+        redirect($this->panel . '/deposit');
     }
 }

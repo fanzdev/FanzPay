@@ -9,7 +9,7 @@
       <p>Admin mengelola operasional dari web dengan permission granular. <?= count($rows) ?> akun terdaftar.</p>
     </div>
   </div>
-  <form method="post" action="<?= url('admin/admin/buat') ?>">
+  <form method="post" action="<?= url($panel . '/admin/buat') ?>">
     <?= \App\Core\CSRF::field() ?>
     <div class="grid2">
       <div class="field"><label>Nama lengkap</label><input name="name" required maxlength="100" autocomplete="off" placeholder="Nama admin"></div>
@@ -36,7 +36,7 @@
     <span class="badge <?= $r['role'] === 'super_admin' ? 'b-info' : 'b-mut' ?>"><?= $r['role'] === 'super_admin' ? 'Super Admin' : 'Admin' ?></span>
   </div>
   <?php if ($r['role'] === 'admin'): ?>
-  <form method="post" action="<?= url('admin/admin/' . $r['id'] . '/perms') ?>">
+  <form method="post" action="<?= url($panel . '/admin/' . $r['id'] . '/perms') ?>">
     <?= \App\Core\CSRF::field() ?>
     <div class="perm-grid">
       <?php foreach ($perms as $p): ?><label class="perm"><input type="checkbox" name="perms[]" value="<?= e($p) ?>" <?= in_array($p, $permsOf[(int)$r['id']] ?? [], true) ? 'checked' : '' ?>> <?= e($p) ?></label><?php endforeach; ?>

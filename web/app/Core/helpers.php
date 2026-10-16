@@ -94,6 +94,14 @@ function redirect(string $path, int $code = 302): void {
     exit;
 }
 
+/** Tujuan dashboard sesuai role: user → home, admin → admin, super_admin → superadmin. */
+function panel_home(?array $u): string {
+    $role = (string)($u['role'] ?? '');
+    if ($role === 'super_admin') return 'superadmin';
+    if ($role === 'admin') return 'admin';
+    return 'home';
+}
+
 function json_response($data, int $code = 200): void {
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');

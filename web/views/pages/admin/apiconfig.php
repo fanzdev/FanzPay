@@ -10,7 +10,7 @@
     <h3>Midtrans Core API — <?= $midtrans_ready ? 'terhubung' : 'belum dikonfigurasi' ?></h3>
     <p>Mode <b class="mono"><?= e($midtrans_mode) ?></b> · Server Key tidak pernah ditampilkan penuh &amp; tidak pernah ke browser.</p>
   </div></div>
-  <form method="post" action="<?= url('admin/api') ?>">
+  <form method="post" action="<?= url($panel . '/api') ?>">
     <?= \App\Core\CSRF::field() ?>
     <div class="grid2">
       <div class="field"><label>Mode</label><select name="midtrans_mode"><option value="sandbox" <?= $midtrans_mode === 'sandbox' ? 'selected' : '' ?>>sandbox</option><option value="production" <?= $midtrans_mode === 'production' ? 'selected' : '' ?>>production</option></select></div>
@@ -22,7 +22,7 @@
       <button class="btn btn-primary" type="submit">Simpan konfigurasi</button>
     </div>
   </form>
-  <form method="post" action="<?= url('admin/api/midtrans-test') ?>" style="margin-top:10px">
+  <form method="post" action="<?= url($panel . '/api/midtrans-test') ?>" style="margin-top:10px">
     <?= \App\Core\CSRF::field() ?>
     <button class="btn btn-ghost" type="submit"><?= icon('refresh', 16) ?> Uji konektivitas (tanpa dana)</button>
   </form>
@@ -30,7 +30,7 @@
 
 <div class="panel">
   <h3>DigiFlazz</h3>
-  <form method="post" action="<?= url('admin/api') ?>">
+  <form method="post" action="<?= url($panel . '/api') ?>">
     <?= \App\Core\CSRF::field() ?>
     <div class="grid2">
       <div class="field"><label>Username</label><input name="digiflazz_user" value="<?= e($s['digiflazz_user'] ?? '') ?>" placeholder="diambil dari .env bila kosong"></div>

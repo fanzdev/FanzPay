@@ -24,7 +24,7 @@ $__path = $__canonPath;
 <meta name="author" content="FanzPay">
 <meta name="robots" content="<?= e($__robots) ?>">
 <link rel="canonical" href="<?= e($__canon) ?>">
-<meta name="theme-color" content="#F4F6FB">
+<meta name="theme-color" content="#F6F8FC">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FanzPay">
 <meta property="og:title" content="<?= e($title ?? 'FanzPay') ?>">
@@ -71,13 +71,17 @@ if ($__faqEnt): ?>
 <a href="#main" style="position:absolute;left:-999px">Lewati ke konten</a>
 <?php
 $__nav = [
-  ['href' => url(''), 'label' => 'Beranda'],
-  ['href' => url('layanan'), 'label' => 'Layanan'],
-  ['href' => url('cara-kerja'), 'label' => 'Cara Kerja'],
-  ['href' => url('keunggulan'), 'label' => 'Keunggulan'],
-  ['href' => url('faq'), 'label' => 'FAQ'],
+  ['href' => url(''), 'label' => 'Beranda', 'frag' => ''],
+  ['href' => url('layanan'), 'label' => 'Layanan', 'frag' => '/layanan'],
+  ['href' => url('cara-kerja'), 'label' => 'Cara Kerja', 'frag' => '/cara-kerja'],
+  ['href' => url('keunggulan'), 'label' => 'Keunggulan', 'frag' => '/keunggulan'],
+  ['href' => url('faq'), 'label' => 'FAQ', 'frag' => '/faq'],
+  ['href' => url('panduan-mcp'), 'label' => 'AI Agentic', 'frag' => '/panduan-mcp'],
 ];
+$__knownFrags = ['/layanan', '/cara-kerja', '/keunggulan', '/faq', '/panduan-mcp', '/harga', '/bantuan', '/login', '/register'];
 $__norm = rtrim($__path, '/'); if ($__norm === '') $__norm = '/';
+$__isKnown = false;
+foreach ($__knownFrags as $__kf) { if (str_contains($__norm, $__kf)) { $__isKnown = true; break; } }
 ?>
 <header class="site-nav">
   <div class="wrap nav-in">
@@ -87,8 +91,7 @@ $__norm = rtrim($__path, '/'); if ($__norm === '') $__norm = '/';
     </a>
     <nav class="nav-links" aria-label="Navigasi utama">
       <?php foreach ($__nav as $n):
-        $frag = ['Beranda' => '', 'Layanan' => '/layanan', 'Cara Kerja' => '/cara-kerja', 'Keunggulan' => '/keunggulan', 'FAQ' => '/faq'][$n['label']] ?? '';
-        $on = $frag === '' ? !str_contains($__norm, '/layanan') && !str_contains($__norm, '/cara-kerja') && !str_contains($__norm, '/keunggulan') && !str_contains($__norm, '/faq') && !str_contains($__norm, '/harga') && !str_contains($__norm, '/bantuan') && !str_contains($__norm, '/login') && !str_contains($__norm, '/register') : str_contains($__norm, $frag);
+        $on = ($n['frag'] ?? '') === '' ? !$__isKnown : str_contains($__norm, (string)$n['frag']);
       ?>
       <a href="<?= e($n['href']) ?>" class="<?= $on ? 'on' : '' ?>" <?= $on ? 'aria-current="page"' : '' ?>><?= e($n['label']) ?></a>
       <?php endforeach; ?>
@@ -108,15 +111,14 @@ $__norm = rtrim($__path, '/'); if ($__norm === '') $__norm = '/';
       ['href' => url('cara-kerja'), 'label' => 'Cara Kerja', 'frag' => '/cara-kerja'],
       ['href' => url('keunggulan'), 'label' => 'Keunggulan', 'frag' => '/keunggulan'],
       ['href' => url('faq'), 'label' => 'FAQ', 'frag' => '/faq'],
+      ['href' => url('panduan-mcp'), 'label' => 'AI Agentic', 'frag' => '/panduan-mcp'],
       ['href' => url('harga'), 'label' => 'Harga dan Biaya', 'frag' => '/harga'],
       ['href' => url('bantuan'), 'label' => 'Pusat Bantuan', 'frag' => '/bantuan'],
       ['href' => url('login'), 'label' => 'Masuk', 'frag' => '/login'],
       ['href' => url('register'), 'label' => 'Daftar', 'frag' => '/register'],
     ];
     foreach ($__mlinks as $ml):
-      $mon = $ml['frag'] === ''
-        ? !str_contains($__norm, '/layanan') && !str_contains($__norm, '/cara-kerja') && !str_contains($__norm, '/keunggulan') && !str_contains($__norm, '/faq') && !str_contains($__norm, '/harga') && !str_contains($__norm, '/bantuan') && !str_contains($__norm, '/login') && !str_contains($__norm, '/register')
-        : str_contains($__norm, $ml['frag']);
+      $mon = ($ml['frag'] ?? '') === '' ? !$__isKnown : str_contains($__norm, (string)$ml['frag']);
     ?>
     <a href="<?= e($ml['href']) ?>" class="<?= $mon ? 'on' : '' ?>" <?= $mon ? 'aria-current="page"' : '' ?>><?= e($ml['label']) ?></a>
     <?php endforeach; ?>
@@ -136,6 +138,7 @@ $__norm = rtrim($__path, '/'); if ($__norm === '') $__norm = '/';
       <a href="<?= url('cara-kerja') ?>">Cara Kerja</a>
       <a href="<?= url('keunggulan') ?>">Keunggulan</a>
       <a href="<?= url('faq') ?>">FAQ</a>
+      <a href="<?= url('panduan-mcp') ?>">AI Agentic</a>
     </div>
     <div class="foot-col">
       <h4>Layanan</h4>

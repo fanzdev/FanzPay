@@ -1,5 +1,5 @@
 <?php
-/** Layout aplikasi user: sidebar desktop + bottom-nav mobile. Glass + theme. */
+/** Layout aplikasi user: sidebar desktop datar (tanpa dropdown) + bottom-nav mobile. */
 require_once fp_base_path('views/partials/icons.php');
 /** @var string $title */ /** @var string $nav */ /** @var array $user */ /** @var int $balance */ /** @var int $unread */ /** @var bool $has_pin */
 $nav = $nav ?? 'home';
@@ -10,10 +10,6 @@ $flat = [
     ['k' => 'history', 'label' => 'Riwayat', 'icon' => 'clock', 'href' => url('riwayat')],
     ['k' => 'profile', 'label' => 'Profil', 'icon' => 'user', 'href' => url('profil')],
 ];
-$finKeys = ['deposit', 'transfer', 'withdraw', 'history'];
-$accKeys = ['profile', 'notif'];
-$finOpen = in_array($nav, $finKeys, true);
-$accOpen = in_array($nav, $accKeys, true);
 $__initial = mb_substr($user['name'] ?? 'U', 0, 1);
 ?>
 <!doctype html>
@@ -24,7 +20,7 @@ $__initial = mb_substr($user['name'] ?? 'U', 0, 1);
 <title><?= e($title ?? 'FanzPay') ?> — FanzPay</title>
 <meta name="description" content="Area pelanggan FanzPay: kelola saldo, transfer gratis, deposit QRIS, tarik dana, dan beli produk digital.">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#F4F6FB">
+<meta name="theme-color" content="#F6F8FC">
 <link rel="icon" type="image/webp" href="<?= asset('img/logo.webp') ?>">
 <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('fanzpay-theme')||'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -43,25 +39,16 @@ $__initial = mb_substr($user['name'] ?? 'U', 0, 1);
       <a href="<?= url('home') ?>" class="<?= $nav === 'home' ? 'on' : '' ?>"><span class="side-ic"><?= icon('home', 18) ?></span><span>Beranda</span></a>
       <a href="<?= url('produk') ?>" class="<?= $nav === 'products' ? 'on' : '' ?>"><span class="side-ic"><?= icon('grid', 18) ?></span><span>Produk Digital</span></a>
       <p class="side-cap">Keuangan</p>
-      <details class="side-group"<?= $finOpen ? ' open' : '' ?>>
-        <summary class="side-group-h<?= $finOpen ? ' on' : '' ?>"><span class="side-ic"><?= icon('wallet', 18) ?></span><span>Transaksi Dana</span><span class="side-chev"><?= icon('chev', 14) ?></span></summary>
-        <div class="side-sub">
-          <a href="<?= url('deposit') ?>" class="<?= $nav === 'deposit' ? 'on' : '' ?>"><span class="side-ic"><?= icon('qr', 16) ?></span><span>Deposit QRIS</span></a>
-          <a href="<?= url('transfer') ?>" class="<?= $nav === 'transfer' ? 'on' : '' ?>"><span class="side-ic"><?= icon('swap', 16) ?></span><span>Transfer Gratis</span></a>
-          <a href="<?= url('withdraw') ?>" class="<?= $nav === 'withdraw' ? 'on' : '' ?>"><span class="side-ic"><?= icon('bank', 16) ?></span><span>Tarik Dana</span></a>
-          <a href="<?= url('riwayat') ?>" class="<?= $nav === 'history' ? 'on' : '' ?>"><span class="side-ic"><?= icon('receipt', 16) ?></span><span>Riwayat Transaksi</span></a>
-        </div>
-      </details>
+      <a href="<?= url('deposit') ?>" class="<?= $nav === 'deposit' ? 'on' : '' ?>"><span class="side-ic"><?= icon('qr', 18) ?></span><span>Deposit QRIS</span></a>
+      <a href="<?= url('transfer') ?>" class="<?= $nav === 'transfer' ? 'on' : '' ?>"><span class="side-ic"><?= icon('swap', 18) ?></span><span>Transfer Gratis</span></a>
+      <a href="<?= url('withdraw') ?>" class="<?= $nav === 'withdraw' ? 'on' : '' ?>"><span class="side-ic"><?= icon('bank', 18) ?></span><span>Tarik Dana</span></a>
+      <a href="<?= url('riwayat') ?>" class="<?= $nav === 'history' ? 'on' : '' ?>"><span class="side-ic"><?= icon('receipt', 18) ?></span><span>Riwayat Transaksi</span></a>
       <p class="side-cap">Akun</p>
-      <details class="side-group"<?= $accOpen ? ' open' : '' ?>>
-        <summary class="side-group-h<?= $accOpen ? ' on' : '' ?>"><span class="side-ic"><?= icon('user', 18) ?></span><span>Akun Saya</span><span class="side-chev"><?= icon('chev', 14) ?></span></summary>
-        <div class="side-sub">
-          <a href="<?= url('profil') ?>" class="<?= $nav === 'profile' ? 'on' : '' ?>"><span class="side-ic"><?= icon('user', 16) ?></span><span>Profil</span></a>
-          <a href="<?= url('qr') ?>"><span class="side-ic"><?= icon('qr', 16) ?></span><span>QR Saya</span></a>
-          <a href="<?= url('pin') ?>"><span class="side-ic"><?= icon('lock', 16) ?></span><span>PIN Transaksi</span><?php if (!($has_pin ?? true)): ?><i class="side-dot"></i><?php endif; ?></a>
-          <a href="<?= url('notifikasi') ?>" class="<?= $nav === 'notif' ? 'on' : '' ?>"><span class="side-ic"><?= icon('bell', 16) ?></span><span>Notifikasi</span><?php if (($unread ?? 0) > 0): ?><i class="side-count"><?= (int)$unread > 9 ? '9+' : (int)$unread ?></i><?php endif; ?></a>
-        </div>
-      </details>
+      <a href="<?= url('profil') ?>" class="<?= $nav === 'profile' ? 'on' : '' ?>"><span class="side-ic"><?= icon('user', 18) ?></span><span>Profil</span></a>
+      <a href="<?= url('qr') ?>"><span class="side-ic"><?= icon('qr', 18) ?></span><span>QR Saya</span></a>
+      <a href="<?= url('pin') ?>"><span class="side-ic"><?= icon('lock', 18) ?></span><span>PIN Transaksi</span><?php if (!($has_pin ?? true)): ?><i class="side-dot"></i><?php endif; ?></a>
+      <a href="<?= url('notifikasi') ?>" class="<?= $nav === 'notif' ? 'on' : '' ?>"><span class="side-ic"><?= icon('bell', 18) ?></span><span>Notifikasi</span><?php if (($unread ?? 0) > 0): ?><i class="side-count"><?= (int)$unread > 9 ? '9+' : (int)$unread ?></i><?php endif; ?></a>
+      <a href="<?= url('mcp-koneksi') ?>" class="<?= $nav === 'mcp' ? 'on' : '' ?>"><span class="side-ic"><?= icon('zap', 18) ?></span><span>Koneksi AI</span></a>
     </nav>
     <div class="side-foot">
       <a class="side-user" href="<?= url('profil') ?>"><span class="side-ava"><?= e(mb_strtoupper(mb_substr($__initial, 0, 1))) ?></span><span class="side-who"><b><?= e(mb_substr($user['name'] ?? 'Pelanggan', 0, 22)) ?></b><small><?= rupiah((int)($balance ?? 0)) ?></small></span></a>

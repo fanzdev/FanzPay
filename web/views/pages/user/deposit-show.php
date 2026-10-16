@@ -35,7 +35,7 @@ foreach ($actions as $a) { if (($a['name'] ?? '') === 'deeplink-redirect' && !em
 <div class="panel qr-box">
   <h3 style="margin-bottom:4px">Pindai kode QR</h3>
   <p style="color:var(--mut);font-size:13px">Buka e-wallet / m-banking apa pun, lalu pindai.</p>
-  <?php if ($qrImg !== ''): ?><img src="<?= e($qrImg) ?>" alt="Kode QR pembayaran" width="250" height="250" style="border-radius:14px;background:#fff;padding:8px"><?php endif; ?>
+  <?php if ($qrImg !== ''): ?><img src="<?= e($qrImg) ?>" alt="Kode QR pembayaran" width="250" height="250" style="border-radius:12px;background:#fff;padding:8px"><?php endif; ?>
   <?php if ($deeplink !== '' && $deeplink[0] !== '#'): ?><p><a class="btn btn-ghost" href="<?= e($deeplink) ?>" target="_blank" rel="noopener">Buka aplikasi pembayaran</a></p><?php endif; ?>
 </div>
 <?php elseif ($method_kind === 'va'): ?>
@@ -55,7 +55,7 @@ foreach ($actions as $a) { if (($a['name'] ?? '') === 'deeplink-redirect' && !em
 <?php else: ?>
 <div class="panel">
   <h3>Instruksi e-wallet</h3>
-  <?php if ($qrImg !== ''): ?><img src="<?= e($qrImg) ?>" alt="Kode QR e-wallet" width="230" height="230" style="border-radius:14px;background:#fff;padding:8px"><?php endif; ?>
+  <?php if ($qrImg !== ''): ?><img src="<?= e($qrImg) ?>" alt="Kode QR e-wallet" width="230" height="230" style="border-radius:12px;background:#fff;padding:8px"><?php endif; ?>
   <?php if ($deeplink !== '' && $deeplink[0] !== '#'): ?><p><a class="btn btn-primary" href="<?= e($deeplink) ?>" target="_blank" rel="noopener">Bayar dengan <?= e($method_label) ?></a></p><?php endif; ?>
   <p style="color:var(--mut);font-size:13px">Selesaikan pembayaran sebesar <b><?= rupiah((int)$d['total_amount']) ?></b> sebelum kedaluwarsa.</p>
 </div>
@@ -78,7 +78,8 @@ foreach ($actions as $a) { if (($a['name'] ?? '') === 'deeplink-redirect' && !em
 .pay-break{display:block;font-size:12.5px;opacity:.85;margin-top:4px}
 .pay-meta{font-size:12px;opacity:.85;margin-top:8px}
 .pay-exp{margin-top:10px;background:rgba(255,255,255,.18);border-radius:12px;padding:8px 12px;font-size:14px}
-.va-num{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg-2);border:1px dashed var(--line);border-radius:14px;padding:14px;font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:2px;margin:10px 0}
+.va-num{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--bg-2);border:1px dashed var(--line);border-radius:12px;padding:14px;font-size:24px;font-weight:800;font-family:var(--disp);letter-spacing:2px;margin:10px 0}
+.va-num span{min-width:0;overflow-wrap:anywhere}
 .va-total{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line-2);padding-top:10px}
 </style>
 <script>

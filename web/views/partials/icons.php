@@ -55,11 +55,15 @@ function icon(string $name, int $size = 20): string {
         'mail' => '<rect x="2" y="4" width="20" height="16" rx="2.5"/><path d="m2.5 6.5 9.5 7 9.5-7"/>',
         'globe' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13.5 13.5 0 0 1 0 18M12 3a13.5 13.5 0 0 0 0 18"/>',
         'arrowUp' => '<path d="M12 20V5"/><path d="m5 12 7-7 7 7"/>',
+        'arrowDown' => '<path d="M12 5v15"/><path d="m5 12 7 7 7-7"/>',
         'play' => '<rect x="2" y="4" width="20" height="16" rx="4"/><path d="m10 9 5 3-5 3V9z"/>',
         'instagram' => '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1"/>',
         'youtube' => '<rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9.5 5 2.5-5 2.5v-5z"/>',
         'atSign' => '<circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/>',
         'shieldLock' => '<path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z"/><rect x="9" y="11" width="6" height="5" rx="1.2"/><path d="M10.2 11V9.8a1.8 1.8 0 0 1 3.6 0V11"/>',
+        'chat' => '<path d="M21 12a8 8 0 0 1-8 8H4l2-3.2A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4"/>',
+        'copy' => '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+        'link' => '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
     ];
     $inner = $p[$name] ?? $p['grid'];
     return '<svg class="ic" width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $inner . '</svg>';

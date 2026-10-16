@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Masuk — FanzPay</title>
+<meta name="description" content="Masuk atau buat akun FanzPay. Satu pintu untuk pelanggan, admin, dan super admin. Pelanggan bisa lewat web & Android; admin & super admin lewat web.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0040F0">
+<link rel="icon" type="image/webp" href="http://localhost/fanzpay/web/public/assets/img/logo.webp?v=1791273301">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('fanzpay-theme')||'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="http://localhost/fanzpay/web/public/assets/css/app.css?v=1792138483">
+</head>
+<body class="auth-body">
+<div class="auth-split">
+  <aside class="auth-show" aria-label="Tentang FanzPay">
+    <div class="auth-deco" aria-hidden="true"><i></i><i></i></div>
+    <div class="auth-show-inner">
+      <a class="brand auth-show-brand" href="http://localhost/fanzpay/web/">
+        <span class="auth-logo"><img src="http://localhost/fanzpay/web/public/assets/img/logo.webp?v=1791273301" alt="FanzPay" width="44" height="44"></span>
+        <span class="auth-brand-tx">FanzPay<em>Dompet Digital &amp; PPOB</em></span>
+      </a>
+      <h2>Satu saldo untuk semua kebutuhan digital.</h2>
+      <p class="auth-lead">Dompet digital &amp; PPOB Indonesia: deposit QRIS real-time, transfer gratis, tarik dana, dan 8 layanan dalam satu dashboard.</p>
+      <ul class="auth-feats">
+        <li><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5.2"/></svg><span><strong>Deposit QRIS real-time</strong><small>Saldo masuk otomatis setelah terverifikasi.</small></span></li>
+        <li><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5.2"/></svg><span><strong>Transfer gratis Rp0</strong><small>Via nomor HP atau pindai QR Code.</small></span></li>
+        <li><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5.2"/></svg><span><strong>Aman &amp; tercatat</strong><small>PIN 6 digit, OTP email, ledger teraudit.</small></span></li>
+      </ul>
+      <p class="auth-small">© 2026 FanzPay</p>
+    </div>
+  </aside>
+  <main class="auth-form">
+    <div class="auth-form-inner">
+      <div class="auth-card"><div class="auth-switch"><a href="http://localhost/fanzpay/web/login" class="on">Masuk</a><a href="http://localhost/fanzpay/web/register">Daftar</a></div>
+<div class="auth-hero">
+  <span class="auth-medal"><svg class="ic" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+  <div>
+    <h1>Selamat datang kembali</h1>
+    <p class="sub">Satu pintu untuk pelanggan, admin, dan super admin.</p>
+  </div>
+</div>
+<form method="post" action="http://localhost/fanzpay/web/login">
+  <input type="hidden" name="_csrf" value="760a2bc50c817bc4c18f2d298b5ad392c5e775fc2d212c0ab5f21b6967c45d60">  <div class="field"><label for="email">Email terdaftar</label><input id="email" name="email" type="email" required autocomplete="email" placeholder="nama@email.com" value=""></div>
+  <div class="field"><label for="password">Kata sandi</label>
+    <div class="pass-wrap"><input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Masukkan kata sandi"><button type="button" class="pass-eye" data-peek="#password" aria-label="Tampilkan kata sandi"></button></div>
+  </div>
+  <input type="hidden" name="remember" value="0">
+  <label class="remember-row"><input type="checkbox" name="remember" value="1" checked> Ingat saya di perangkat ini (tetap login 30 hari)</label>
+  <button class="btn btn-primary btn-block btn-lg" type="submit">Masuk ke Akun <svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></svg></button>
+</form>
+<p class="auth-foot">Belum punya akun? <a href="http://localhost/fanzpay/web/register"><strong>Daftar gratis.</strong></a></p>
+<div class="auth-trust">
+  <div><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>PIN 6 digit transaksi</span></div>
+  <div><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5.2"/></svg><span>Verifikasi email</span></div>
+  <div><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18l-2.3-1.5L14.4 21l-2.4-1.5L9.6 21l-2.3-1.5L5 21V3z"/><path d="M9 8h6M9 12h6"/></svg><span>Ledger teraudit</span></div>
+</div>
+</div>
+      <p class="auth-note">PIN 6 digit · Verifikasi email · Ledger teraudit.</p>
+    </div>
+  </main>
+</div>
+<script src="http://localhost/fanzpay/web/public/assets/js/app.js?v=1792132234" defer></script>
+</body>
+</html>

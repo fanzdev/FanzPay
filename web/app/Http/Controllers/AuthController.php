@@ -33,9 +33,14 @@ final class AuthController {
             redirect('login');
         }
         if ($u['status'] !== 'active') { flash('error', 'Akun belum aktif. Verifikasi email dulu.'); redirect('login'); }
-        Auth::login($u);
+        // "Ingat saya" default AKTIF agar user tidak perlu login lagi di perangkat ini.
+        // Form mengirim remember=1 (checked) / remember=0 (unchecked via hidden input).
+        // Form lama tanpa field dianggap 1 (tetap ingat) demi kompatibilitas.
+        $rememberRaw = $_POST['remember'] ?? '1';
+        $remember = !in_array($rememberRaw, ['0', 'false', 'off', ''], true);
+        Auth::login($u, $remember);
         Logger::audit((int)$u['id'], $u['role'], 'auth.login', 'users', (int)$u['id']);
-        redirect($u['role'] === 'user' ? '' : 'admin');
+        redirect($u['role'] === 'user' ? '' : panel_home($u));
     }
 
     public function register(): void {
@@ -149,7 +154,7 @@ final class AuthController {
                 Logger::audit((int)$u['id'], 'super_admin', 'auth.setup_super.created', 'users', (int)$u['id']);
             }
             flash('ok', 'Super Admin berhasil dibuat. Selamat datang, Founding Circle.');
-            redirect('admin');
+            redirect('superadmin');
         } catch (\Throwable $e) {
             flash('error', $e->getMessage() === 'Setup sudah ditutup.' ? 'Setup Super Admin sudah ditutup.' : 'Gagal membuat Super Admin. Coba lagi.');
             redirect($e->getMessage() === 'Setup sudah ditutup.' ? 'login' : 'setup-super');

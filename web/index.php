@@ -63,6 +63,7 @@ if ($path === '/index.php') $path = '/';
 
 $isApi = str_starts_with($path, '/api/');
 $isWebhook = str_starts_with($path, '/webhooks/');
+$isMcp = $path === '/mcp' || str_starts_with($path, '/mcp/');
 
 // ---- SEO/keamanan: path internal tidak pernah di-serve (defense in depth di semua SAPI,
 // melengkapi .htaccess agar tetap aman mis. di PHP built-in server / hosting tanpa .htaccess) ----
@@ -75,12 +76,12 @@ if ($__blockedFile || $__blockedDir) {    http_response_code(404);
     exit;
 }
 
-if (!$isApi && !$isWebhook && Settings::maintenance()) {
+if (!$isApi && !$isWebhook && !$isMcp && Settings::maintenance()) {
     $u = Auth::user();
-    $allowed = $u && $u['role'] === 'super_admin' && in_array($path, ['/login', '/logout', '/admin', '/admin/pengaturan'], true);
+    $allowed = $u && $u['role'] === 'super_admin' && in_array($path, ['/login', '/logout', '/admin', '/admin/pengaturan', '/superadmin', '/superadmin/pengaturan'], true);
     // setup-super selalu boleh diakses saat maintenance (dibatasi sendiri: hanya saat belum ada super_admin).
     // Halaman publik esensial tetap boleh dibaca agar SEO & unduhan APK tidak mati.
-    $publicOk = in_array($path, ['/', '/login', '/register', '/verify', '/setup-super', '/download-apk', '/unduh', '/sitemap.xml', '/robots.txt'], true)
+    $publicOk = in_array($path, ['/', '/login', '/register', '/verify', '/setup-super', '/download-apk', '/unduh', '/panduan-mcp', '/sitemap.xml', '/robots.txt'], true)
         || str_starts_with($path, '/pay/') || str_starts_with($path, '/public/assets');
     if (!$allowed && !$publicOk) {
         http_response_code(503);
@@ -123,9 +124,10 @@ $router->get('/logout', ['AuthController', 'logout']);
 // Setelah satu super_admin ada, rute ini otomatis terkunci (redirect ke login).
 $router->get('/setup-super', ['AuthController', 'setupSuper']);
 $router->post('/setup-super', ['AuthController', 'doSetupSuper']);
-// Unduhan APK Android + SEO
+// Unduhan APK Android + SEO + Tutorial MCP
 $router->get('/download-apk', ['WebController', 'downloadApk']);
 $router->get('/unduh', ['WebController', 'downloadApk']);
+$router->get('/panduan-mcp', ['WebController', 'mcpSetup']);
 $router->get('/sitemap.xml', ['WebController', 'sitemap']);
 $router->get('/robots.txt', ['WebController', 'robots']);
 
@@ -151,37 +153,55 @@ $router->post('/profil', ['UserController', 'doProfile']);
 $router->get('/pin', ['UserController', 'pin']);
 $router->post('/pin', ['UserController', 'doPin']);
 $router->get('/qr', ['UserController', 'qr']);
+// User: Koneksi AI (MCP)
+$router->get('/mcp-koneksi', ['McpController', 'connections']);
+$router->post('/mcp-koneksi/buat', ['McpController', 'createToken']);
+$router->post('/mcp-koneksi/{id}/cabut', ['McpController', 'revokeToken']);
+$router->get('/mcp-kebijakan', ['McpController', 'policy']);
+$router->post('/mcp-kebijakan', ['McpController', 'savePolicy']);
 // alias root untuk user
 $router->get('/dashboard', ['UserController', 'home']);
 
-// Admin
-$router->get('/admin', ['AdminController', 'dashboard']);
-$router->get('/admin/pengguna', ['AdminController', 'users']);
-$router->post('/admin/pengguna/{id}/toggle', ['AdminController', 'userToggle']);
-$router->get('/admin/admin', ['AdminController', 'admins']);
-$router->post('/admin/admin/buat', ['AdminController', 'adminStore']);
-$router->post('/admin/admin/{id}/perms', ['AdminController', 'adminPerms']);
-$router->get('/admin/transaksi', ['AdminController', 'transactions']);
-$router->get('/admin/deposit', ['AdminController', 'deposits']);
-$router->get('/admin/withdraw', ['AdminController', 'withdrawals']);
-$router->post('/admin/withdraw/{ref}/reject', ['AdminController', 'withdrawalReject']);
-$router->get('/admin/produk', ['AdminController', 'products']);
-$router->post('/admin/produk/harga', ['AdminController', 'priceSave']);
-$router->post('/admin/produk/{id}/toggle', ['AdminController', 'productToggle']);
-$router->post('/admin/produk/sinkron', ['AdminController', 'syncProducts']);
-$router->get('/admin/laporan', ['AdminController', 'reports']);
-$router->get('/admin/audit', ['AdminController', 'audit']);
-$router->get('/admin/rekonsiliasi', ['AdminController', 'reconcile']);
-$router->post('/admin/rekonsiliasi/{ref}/refund', ['AdminController', 'reconcileRefund']);
-$router->get('/admin/notifikasi', ['AdminController', 'notifications']);
-$router->post('/admin/notifikasi', ['AdminController', 'notifications']);
-$router->get('/admin/pengaturan', ['AdminController', 'settings']);
-$router->post('/admin/pengaturan', ['AdminController', 'settings']);
-$router->get('/admin/api', ['AdminController', 'apiConfig']);
-$router->post('/admin/api', ['AdminController', 'apiConfig']);
-$router->post('/admin/api/midtrans-test', ['AdminController', 'midtransTest']);
-$router->post('/admin/deposit/{ref}/sync', ['AdminController', 'depositSync']);
-$router->post('/admin/deposit/{ref}/simulate', ['AdminController', 'depositSimulate']);
+// Panel staff: /admin (role admin) + /superadmin (role super_admin).
+// SuperAdminController mewarisi seluruh logika AdminController.
+$panelRoutes = [
+    ['GET', '', 'dashboard'],
+    ['GET', '/pengguna', 'users'],
+    ['POST', '/pengguna/{id}/toggle', 'userToggle'],
+    ['GET', '/admin', 'admins'],
+    ['POST', '/admin/buat', 'adminStore'],
+    ['POST', '/admin/{id}/perms', 'adminPerms'],
+    ['GET', '/transaksi', 'transactions'],
+    ['GET', '/deposit', 'deposits'],
+    ['GET', '/withdraw', 'withdrawals'],
+    ['POST', '/withdraw/{ref}/reject', 'withdrawalReject'],
+    ['GET', '/produk', 'products'],
+    ['POST', '/produk/harga', 'priceSave'],
+    ['POST', '/produk/{id}/toggle', 'productToggle'],
+    ['POST', '/produk/sinkron', 'syncProducts'],
+    ['GET', '/laporan', 'reports'],
+    ['GET', '/audit', 'audit'],
+    ['GET', '/rekonsiliasi', 'reconcile'],
+    ['POST', '/rekonsiliasi/{ref}/refund', 'reconcileRefund'],
+    ['GET', '/notifikasi', 'notifications'],
+    ['POST', '/notifikasi', 'notifications'],
+    ['GET', '/pengaturan', 'settings'],
+    ['POST', '/pengaturan', 'settings'],
+    ['GET', '/api', 'apiConfig'],
+    ['POST', '/api', 'apiConfig'],
+    ['GET', '/mcp', 'mcp'],
+    ['POST', '/mcp', 'mcp'],
+    ['POST', '/mcp/cabut/{id}', 'mcpRevoke'],
+    ['POST', '/api/midtrans-test', 'midtransTest'],
+    ['POST', '/deposit/{ref}/sync', 'depositSync'],
+    ['POST', '/deposit/{ref}/simulate', 'depositSimulate'],
+];
+foreach (['admin' => 'AdminController', 'superadmin' => 'SuperAdminController'] as $prefix => $ctrl) {
+    foreach ($panelRoutes as [$m, $suffix, $handler]) {
+        if ($m === 'GET') $router->get('/' . $prefix . $suffix, [$ctrl, $handler]);
+        else $router->post('/' . $prefix . $suffix, [$ctrl, $handler]);
+    }
+}
 
 // API JSON
 $router->post('/api/auth/login', ['ApiController', 'login']);
@@ -204,15 +224,19 @@ $router->post('/webhooks/buatqris', ['WebhookController', 'buatqris']);
 $router->post('/webhooks/digiflazz', ['WebhookController', 'digiflazz']);
 $router->post('/webhooks/midtrans', ['WebhookController', 'midtrans']);
 
+// MCP Server (Streamable HTTP JSON-RPC)
+$router->get('/mcp', ['McpController', 'discovery']);
+$router->post('/mcp', ['McpController', 'endpoint']);
+
 $match = $router->match($_SERVER['REQUEST_METHOD'] ?? 'GET', $path);
 if (!$match) {
-    // root "/" untuk user login → home
+    // root "/" untuk user login → panel masing-masing
     if ($path === '/') {
         $u = Auth::user();
-        if ($u) { redirect($u['role'] === 'user' ? 'home' : 'admin'); }
+        if ($u) { redirect($u['role'] === 'user' ? 'home' : panel_home($u)); }
     }
     http_response_code(404);
-    if ($isApi) json_response(['ok' => false, 'message' => 'Tidak ditemukan.'], 404);
+    if ($isApi || $isMcp) json_response(['ok' => false, 'message' => 'Tidak ditemukan.'], 404);
     View::render('errors/404', ['title' => 'Tidak ditemukan', 'robots' => 'noindex, nofollow'], 'public');
     exit;
 }

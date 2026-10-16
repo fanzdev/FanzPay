@@ -127,5 +127,52 @@ t('view-data-key', function () {
     assert_true($out === 'ADA|T', 'render=' . $out);
 });
 
+// 12. Palet: seluruh warna UI turunan logo (biru + netral + 3 semantik redup)
+t('palette-only', function () {
+    $base = dirname(__DIR__);
+    $allowedHex = [
+        // brand (logo #0040F0 / #1090F0) + tint
+        '001a6e','00279e','0033cc','0040f0','0868f0','1090f0','7fb2fc','b3d3fd','d9e9fe','eef5ff',
+        // surface navy
+        '060b18','070f20','0a1224','0a1734','0d1730','0e1b38','0f2050','101e45','142a66','1e3270',
+        // netral ink/line/bg
+        '0a1a33','46587a','6b7c99','f6f8fc','eef3fa','e4eaf3','f0f4fa','ffffff','eaf1fb','b9c7dd','8a99b5','9babc7',
+        // tint biru
+        'dbe7ff','c9d8ff','9db8ff','7ea2ff','edf3ff',
+        // semantik redup (hanya status)
+        '157f53','e6f5ee','b45309','fdf3e2','b3261e','fcedea','e8f0fe','7fd8b0','e8b366','f1a09a','f6d3d0','8f231c','0f6b49','6e4e06',
+    ];
+    $allowedRgb = ['255,255,255','0,0,0','10,26,51','0,64,240','8,104,240','16,144,240','127,178,252','148,178,255','219,231,255','21,127,83','180,83,9','179,38,30','241,160,154','6,11,24','13,23,48','138,153,181'];
+    $viol = [];
+    $scan = function (string $dir) use (&$scan, $base, $allowedHex, $allowedRgb, &$viol): void {
+        foreach (scandir($dir) ?: [] as $f) {
+            if ($f === '.' || $f === '..') continue;
+            $p = $dir . '/' . $f;
+            if (is_dir($p)) { $scan($p); continue; }
+            if (!preg_match('/\.(css|js|php)$/', $f)) continue;
+            $src = (string)file_get_contents($p);
+            $rel = str_replace('\\', '/', substr($p, strlen($base) + 1));
+            $line = fn(int $off): int => substr_count(substr($src, 0, $off), "\n") + 1;
+            if (preg_match_all('/#([0-9A-Fa-f]{3,8})\b/', $src, $m, PREG_OFFSET_CAPTURE)) {
+                foreach ($m[1] as $i => $hit) {
+                    $v = strtolower($hit[0]);
+                    if (strlen($v) === 3) $v = $v[0] . $v[0] . $v[1] . $v[1] . $v[2] . $v[2];
+                    if (!in_array($v, $allowedHex, true)) $viol[] = "{$rel}:{$line($m[0][$i][1])} #{$hit[0]}";
+                }
+            }
+            if (preg_match_all('/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/', $src, $m2, PREG_OFFSET_CAPTURE)) {
+                foreach ($m2[1] as $i => $r) {
+                    $key = $r[0] . ',' . $m2[2][$i][0] . ',' . $m2[3][$i][0];
+                    if (!in_array($key, $allowedRgb, true)) $viol[] = "{$rel}:{$line($m2[0][$i][1])} rgb({$key})";
+                }
+            }
+        }
+    };
+    $scan($base . '/public/assets/css');
+    $scan($base . '/public/assets/js');
+    $scan($base . '/views');
+    assert_true($viol === [], "warna di luar palet:\n" . implode("\n", array_slice($viol, 0, 25)));
+});
+
 echo "\n{$pass} lulus, {$fail} gagal\n";
 exit($fail > 0 ? 1 : 0);

@@ -47,7 +47,7 @@
       <div class="review-row"><small>Email</small><b data-review="email">—</b></div>
       <div class="review-row"><small>Kata sandi</small><b data-review="password">—</b></div>
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:4px">
+    <div class="review-actions">
       <button type="button" class="review-edit" data-wgoto="0">Ubah data diri</button>
       <span class="muted">·</span>
       <button type="button" class="review-edit" data-wgoto="1">Ubah keamanan</button>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Audit Log — FanzPay Super Admin</title>
+<meta name="description" content="Panel admin & super admin FanzPay: kelola pengguna, transaksi, produk, rekonsiliasi, dan audit. Akses khusus web.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0A1A33">
+<link rel="icon" type="image/webp" href="http://localhost/fanzpay/web/public/assets/img/logo.webp?v=1791273301">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('fanzpay-theme')||'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="http://localhost/fanzpay/web/public/assets/css/app.css?v=1792138483">
+</head>
+<body>
+<div class="shell admin-shell">
+  <aside class="as-side" id="adminSide" aria-label="Navigasi super admin">
+    <div class="as-brand">
+      <a class="as-brand-link" href="http://localhost/fanzpay/web/superadmin">
+        <span class="as-logo"><img src="http://localhost/fanzpay/web/public/assets/img/logo.webp?v=1791273301" alt="FanzPay" width="38" height="38"></span>
+        <span class="as-brand-tx"><b>FanzPay</b><small>Dompet Digital &amp; PPOB</small></span>
+      </a>
+      <span class="as-rolepill">SUPER</span>
+    </div>
+
+    <div class="as-role">
+      <span class="as-role-ic"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z"/><path d="m9 11.5 2 2 4-4.5"/></svg></span>
+      <span class="as-role-tx">
+        <b>Super Admin</b>
+        <small>Kontrol penuh sistem</small>
+      </span>
+    </div>
+
+    <nav class="as-nav" aria-label="Menu panel">
+            <div class="as-sec">
+        <span class="as-sec-h">Transaksi Dana</span>
+                <a class="as-item" style="--i:0" href="http://localhost/fanzpay/web/superadmin/transaksi">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span class="as-lb">Transaksi</span>
+        </a>
+                <a class="as-item" style="--i:1" href="http://localhost/fanzpay/web/superadmin/deposit">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="as-lb">Deposit</span>
+        </a>
+                <a class="as-item" style="--i:2" href="http://localhost/fanzpay/web/superadmin/withdraw">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span><span class="as-lb">Withdraw</span>
+        </a>
+                <a class="as-item" style="--i:3" href="http://localhost/fanzpay/web/superadmin/rekonsiliasi">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 3v4h-4"/></svg></span><span class="as-lb">Rekonsiliasi</span>
+        </a>
+              </div>
+            <div class="as-sec">
+        <span class="as-sec-h">Pengguna &amp; Produk</span>
+                <a class="as-item" style="--i:4" href="http://localhost/fanzpay/web/superadmin/pengguna">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg></span><span class="as-lb">Pengguna</span>
+        </a>
+                <a class="as-item" style="--i:5" href="http://localhost/fanzpay/web/superadmin/produk">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="as-lb">Produk &amp; Harga</span>
+        </a>
+                <a class="as-item" style="--i:6" href="http://localhost/fanzpay/web/superadmin/laporan">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z"/><path d="M3 13h6l1.5 2h3L15 13h6"/></svg></span><span class="as-lb">Laporan</span>
+        </a>
+              </div>
+            <div class="as-sec">
+        <span class="as-sec-h">Tim &amp; Sistem</span>
+                <a class="as-item" style="--i:7" href="http://localhost/fanzpay/web/superadmin/admin">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z"/></svg></span><span class="as-lb">Kelola Admin</span>
+        </a>
+                <a class="as-item" style="--i:8" href="http://localhost/fanzpay/web/superadmin/notifikasi">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span><span class="as-lb">Notifikasi</span>
+        </a>
+                <a class="as-item on" style="--i:9" href="http://localhost/fanzpay/web/superadmin/audit" aria-current="page">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span class="as-lb">Audit Log</span>
+        </a>
+                <a class="as-item" style="--i:10" href="http://localhost/fanzpay/web/superadmin/pengaturan">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg></span><span class="as-lb">Pengaturan</span>
+        </a>
+                <a class="as-item" style="--i:11" href="http://localhost/fanzpay/web/superadmin/api">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span><span class="as-lb">API Config</span>
+        </a>
+                <a class="as-item" style="--i:12" href="http://localhost/fanzpay/web/superadmin/mcp">
+          <span class="as-ic"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="3" y="13" width="4" height="7" rx="1.5"/><rect x="17" y="13" width="4" height="7" rx="1.5"/><path d="M19 20a4 4 0 0 1-4 2h-2"/></svg></span><span class="as-lb">MCP Server</span>
+        </a>
+              </div>
+          </nav>
+
+    <div class="as-foot">
+      <div class="as-user" title="Akun panel">
+        <span class="as-ava">A</span>
+        <span class="as-who"><b>ACH. AFANOR RIDHA</b><small>super_admin</small></span>
+      </div>
+      <a class="as-out" href="http://localhost/fanzpay/web/logout" title="Keluar" aria-label="Keluar dari panel"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg></a>
+    </div>
+  </aside>
+  <div class="as-backdrop" id="adminBackdrop" aria-hidden="true"></div>
+
+  <div class="main">
+    <header class="as-topbar">
+      <div class="as-tb-left">
+        <button class="as-burger" id="adminBurger" aria-label="Buka menu" aria-expanded="false"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <div class="as-tb-tx">
+          <small>Super Admin</small>
+          <span class="as-tb-title">Audit Log</span>
+        </div>
+      </div>
+      <div class="as-tb-right">
+        <a class="as-ico" href="http://localhost/fanzpay/web/" title="Lihat situs publik" aria-label="Lihat situs publik"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13.5 13.5 0 0 1 0 18M12 3a13.5 13.5 0 0 0 0 18"/></svg></a>
+        <button type="button" class="as-ico" data-theme-toggle aria-label="Ganti mode gelap atau terang"><span data-theme-icon><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg></span></button>
+        <span class="badge b-info as-tb-badge">SUPER ADMIN</span>
+        <a class="as-out-btn" href="http://localhost/fanzpay/web/logout"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Keluar</span></a>
+      </div>
+    </header>
+    <div class="content wide as-content anim-fadeUp"><div class="panel"><div class="table-wrap"><table class="tbl">
+  <tr><th>Waktu</th><th>Aktor</th><th>Aksi</th><th>Target</th><th>Hasil</th><th>IP</th></tr>
+        <tr><td><small>2026-10-16 14:07:48</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-16 13:07:50</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.logout</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-16 12:44:50</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-16 12:16:21</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.logout</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-16 11:02:39</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 11:02:39</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 11:02:39</small></td><td>#–<br><small></small></td><td class="mono">mcp.pin_blocked</td><td>mcp execute_ppob_purchase</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:42:02</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-16 10:22:06</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">127.0.0.1</td></tr>
+      <tr><td><small>2026-10-16 10:18:25</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:18:24</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:18:23</small></td><td>#–<br><small></small></td><td class="mono">mcp.pin_blocked</td><td>mcp execute_ppob_purchase</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:17:20</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:17:19</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:17:19</small></td><td>#–<br><small></small></td><td class="mono">mcp.pin_blocked</td><td>mcp execute_ppob_purchase</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:16:33</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:16:33</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:16:32</small></td><td>#–<br><small></small></td><td class="mono">mcp.pin_blocked</td><td>mcp execute_ppob_purchase</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:13:55</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:13:55</small></td><td>#–<br><small></small></td><td class="mono">mcp.error</td><td>mcp tools/call</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-16 10:13:55</small></td><td>#–<br><small></small></td><td class="mono">mcp.pin_blocked</td><td>mcp execute_ppob_purchase</td><td>fail</td><td class="mono">0.0.0.0</td></tr>
+      <tr><td><small>2026-10-13 10:17:03</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-13 10:01:01</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-13 10:00:46</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">192.168.1.2</td></tr>
+      <tr><td><small>2026-10-13 10:00:46</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">192.168.1.2</td></tr>
+      <tr><td><small>2026-10-13 10:00:38</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.login</td><td>users 44</td><td>ok</td><td class="mono">192.168.1.2</td></tr>
+      <tr><td><small>2026-10-11 14:33:19</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.logout</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-11 14:32:54</small></td><td>ACH. AFANOR RIDHA<br><small>super_admin</small></td><td class="mono">auth.setup_super.created</td><td>users 44</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-11 12:22:31</small></td><td>#–<br><small></small></td><td class="mono">auth.setup_super.blocked</td><td>users </td><td>fail</td><td class="mono">127.0.0.1</td></tr>
+      <tr><td><small>2026-10-11 12:22:30</small></td><td>#–<br><small></small></td><td class="mono">auth.setup_super.blocked</td><td>users </td><td>fail</td><td class="mono">127.0.0.1</td></tr>
+      <tr><td><small>2026-10-11 12:17:24</small></td><td>#–<br><small></small></td><td class="mono">auth.setup_super.blocked</td><td>users </td><td>fail</td><td class="mono">127.0.0.1</td></tr>
+      <tr><td><small>2026-10-11 12:17:24</small></td><td>#–<br><small></small></td><td class="mono">auth.setup_super.blocked</td><td>users </td><td>fail</td><td class="mono">127.0.0.1</td></tr>
+      <tr><td><small>2026-10-11 12:16:20</small></td><td>#–<br><small></small></td><td class="mono">auth.setup_super.blocked</td><td>users </td><td>fail</td><td class="mono">127.0.0.1</td></tr>
+      <tr><td><small>2026-10-06 16:35:58</small></td><td>#38<br><small>super_admin</small></td><td class="mono">auth.setup_super.created</td><td>users 38</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-06 16:19:10</small></td><td>#28<br><small></small></td><td class="mono">deposit.create</td><td>deposits DEP-D6DAF8E0A437-6cl0oskiy</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-06 16:19:08</small></td><td>#28<br><small></small></td><td class="mono">pin.set</td><td>transaction_pins 28</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-06 16:18:52</small></td><td>#28<br><small>user</small></td><td class="mono">auth.verified</td><td>users 28</td><td>ok</td><td class="mono">::1</td></tr>
+      <tr><td><small>2026-10-06 15:53:32</small></td><td>#17<br><small>user</small></td><td class="mono">auth.verified</td><td>users 17</td><td>ok</td><td class="mono">::1</td></tr>
+  </table></div></div>
+</div>
+  </div>
+</div>
+<script>
+(function(){
+  var side=document.getElementById('adminSide');
+  if(!side)return;
+  var bd=document.getElementById('adminBackdrop'),bg=document.getElementById('adminBurger');
+  var mq=window.matchMedia('(max-width:767px)');
+  function setMenu(open){
+    side.classList.toggle('on',!!open);
+    if(bd)bd.classList.toggle('on',!!open);
+    if(bg)bg.setAttribute('aria-expanded',open?'true':'false');
+    document.body.style.overflow=(open&&mq.matches)?'hidden':'';
+  }
+  if(bg)bg.addEventListener('click',function(){setMenu(!side.classList.contains('on'));});
+  if(bd)bd.addEventListener('click',function(){setMenu(false);});
+  window.addEventListener('resize',function(){if(!mq.matches)setMenu(false);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setMenu(false);});
+})();
+</script>
+<script src="http://localhost/fanzpay/web/public/assets/js/app.js?v=1792132234" defer></script>
+</body>
+</html>

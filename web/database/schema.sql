@@ -62,6 +62,19 @@ CREATE TABLE IF NOT EXISTS api_tokens (
   CONSTRAINT fk_tok_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS remember_tokens (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  ip VARCHAR(64) NOT NULL DEFAULT '',
+  user_agent VARCHAR(255) NOT NULL DEFAULT '',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at DATETIME NOT NULL,
+  UNIQUE KEY uq_remember (token_hash),
+  KEY idx_remember_user (user_id),
+  CONSTRAINT fk_remember_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS email_otps (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(190) NOT NULL,
@@ -380,6 +393,72 @@ CREATE TABLE IF NOT EXISTS banners (
   link VARCHAR(255) NOT NULL DEFAULT '',
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   sort INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS mcp_tokens (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(80) NOT NULL DEFAULT 'AI connector',
+  client VARCHAR(80) NOT NULL DEFAULT 'generic',
+  token_hash CHAR(64) NOT NULL,
+  scopes VARCHAR(60) NOT NULL DEFAULT 'read',
+  expires_at DATETIME NOT NULL,
+  revoked_at DATETIME NULL,
+  last_used_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_mcp_token (token_hash),
+  KEY idx_mcp_user (user_id),
+  CONSTRAINT fk_mcp_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS mcp_purchase_policy (
+  user_id BIGINT UNSIGNED PRIMARY KEY,
+  enabled TINYINT(1) NOT NULL DEFAULT 0,
+  max_per_tx INT NOT NULL DEFAULT 0,
+  max_daily INT NOT NULL DEFAULT 0,
+  allowed_categories TEXT NOT NULL,
+  allow_new_numbers TINYINT(1) NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_mcp_policy_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS mcp_preparations (
+  id VARCHAR(48) NOT NULL PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  product_code VARCHAR(60) NOT NULL,
+  customer_no VARCHAR(40) NOT NULL,
+  sell_price INT NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'prepared',
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_mcp_prep_user (user_id),
+  CONSTRAINT fk_mcp_prep_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS mcp_support_tickets (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ticket_no VARCHAR(32) NOT NULL UNIQUE,
+  user_id BIGINT UNSIGNED NOT NULL,
+  subject VARCHAR(150) NOT NULL,
+  message VARCHAR(1000) NOT NULL,
+  reference_id VARCHAR(64) NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'open',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_mcp_ticket_user (user_id),
+  CONSTRAINT fk_mcp_ticket_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS mcp_reminders (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  body VARCHAR(255) NOT NULL DEFAULT '',
+  remind_at DATETIME NULL,
+  is_done TINYINT(1) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_mcp_rem_user (user_id),
+  CONSTRAINT fk_mcp_rem_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

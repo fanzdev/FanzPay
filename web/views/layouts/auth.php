@@ -8,7 +8,7 @@ require_once fp_base_path('views/partials/icons.php'); ?>
 <title><?= e($title ?? 'FanzPay') ?></title>
 <meta name="description" content="Masuk atau buat akun FanzPay. Satu pintu untuk pelanggan, admin, dan super admin. Pelanggan bisa lewat web & Android; admin & super admin lewat web.">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#1B4DFF">
+<meta name="theme-color" content="#0040F0">
 <link rel="icon" type="image/webp" href="<?= asset('img/logo.webp') ?>">
 <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('fanzpay-theme')||'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">

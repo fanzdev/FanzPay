@@ -3,7 +3,7 @@
 <?php if ($ok): ?><div class="alert ok"><?= e($ok) ?></div><?php endif; ?>
 <div class="panel">
   <div class="dash-head"><span class="dash-ic"><?= icon('tag', 22) ?></span><div><h3><?= e($p['name']) ?></h3><p><?= e($p['cat_name']) ?> · Harga final</p></div></div>
-  <p style="font-size:28px;font-weight:700;color:var(--brand-700)"><?= rupiah((int)$p['sell_price']) ?></p>
+  <p class="price-big"><?= rupiah((int)$p['sell_price']) ?></p>
   <form method="post" action="<?= url('ppob/beli') ?>" data-idem>
     <?= \App\Core\CSRF::field() ?>
     <input type="hidden" name="code" value="<?= e($p['code']) ?>">

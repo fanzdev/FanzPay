@@ -16,7 +16,7 @@ use App\Services\MidtransService;
       <div style="font-family:var(--disp);font-size:30px;font-weight:800"><?= rupiah((int)($balance ?? 0)) ?></div>
       <div style="opacity:.8;font-size:12.5px">Deposit masuk otomatis setelah pembayaran terverifikasi · maks. <?= (int)$exp_min ?> menit</div>
     </div>
-    <span style="background:rgba(255,255,255,.2);border-radius:14px;padding:10px"><?= icon('wallet', 26) ?></span>
+    <span style="background:rgba(255,255,255,.2);border-radius:12px;padding:10px"><?= icon('wallet', 26) ?></span>
   </div>
 </div>
 
@@ -29,7 +29,7 @@ use App\Services\MidtransService;
     <?= \App\Core\CSRF::field() ?>
     <input type="hidden" name="_idem" value="">
     <div class="field"><label for="amount">Nominal deposit (masuk ke saldo)</label><input id="amount" name="amount" type="number" min="<?= $min ?>" max="<?= $max ?>" step="1000" required placeholder="50000" inputmode="numeric"></div>
-    <div class="grid2" style="grid-template-columns:repeat(4,1fr)">
+    <div class="amt-grid">
       <?php foreach ([10000, 50000, 100000, 250000] as $q): ?>
         <button type="button" class="btn btn-ghost btn-sm" data-amt="<?= $q ?>"><?= rupiah($q) ?></button>
       <?php endforeach; ?>
@@ -78,15 +78,16 @@ use App\Services\MidtransService;
 <style>
 .dep-methods{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 @media(max-width:560px){.dep-methods{grid-template-columns:1fr}}
-.dep-method{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;cursor:pointer;background:var(--card-solid);transition:border-color .2s,box-shadow .2s;position:relative}
+.dep-method{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;background:var(--card-solid);transition:border-color .2s,box-shadow .2s;position:relative}
+.dep-method:focus-within{border-color:var(--brand-600);box-shadow:0 0 0 4px rgba(0,64,240,.14)}
 .dep-method input{position:absolute;opacity:0;pointer-events:none}
-.dep-method.on{border-color:var(--brand-600);box-shadow:0 0 0 3px rgba(27,77,255,.12)}
+.dep-method.on{border-color:var(--brand-600);box-shadow:0 0 0 3px rgba(0,64,240,.12)}
 .dep-m-ic{display:inline-flex;width:38px;height:38px;border-radius:11px;background:var(--grad-soft);align-items:center;justify-content:center;color:var(--brand-600)}
 .dep-m-tx{display:flex;flex-direction:column;line-height:1.3}
 .dep-m-tx small{color:var(--mut);font-size:12px}
 .dep-m-check{margin-left:auto;color:var(--brand-600);opacity:0}
 .dep-method.on .dep-m-check{opacity:1}
-.dep-summary{margin-top:14px;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;background:color-mix(in srgb,var(--card-solid) 70%,transparent)}
+.dep-summary{margin-top:14px;border:1px dashed var(--line);border-radius:12px;padding:12px 14px;background:var(--card-solid);background:color-mix(in srgb,var(--card-solid) 70%,transparent)}
 .dep-summary>div{display:flex;justify-content:space-between;padding:3px 0;font-size:14px}
 .dep-summary .dep-total{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-size:16px}
 .dep-summary .dep-total b{font-family:var(--disp)}

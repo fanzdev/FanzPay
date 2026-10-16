@@ -3,15 +3,21 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-/** Session hardening: regenerate, expiry, invalidation. */
+/** Session hardening: regenerate, expiry, invalidation.
+ * Cookie dibuat persisten 30 hari agar user tetap login setelah
+ * browser ditutup / komputer di-restart (disimpan di local/komputer).
+ */
 final class Session {
-    private const LIFETIME = 43200; // 12 jam
+    public const LIFETIME = 2592000; // 30 hari (detik)
 
     public static function start(): void {
         if (session_status() === PHP_SESSION_ACTIVE) return;
         $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        // Sinkronkan masa berlaku session file di server dengan cookie.
+        @ini_set('session.gc_maxlifetime', (string)self::LIFETIME);
+        @ini_set('session.cookie_lifetime', (string)self::LIFETIME);
         session_set_cookie_params([
-            'lifetime' => 0,
+            'lifetime' => self::LIFETIME,
             'path' => '/',
             'httponly' => true,
             'secure' => $secure,
@@ -35,10 +41,16 @@ final class Session {
 
     public static function destroy(): void {
         $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
+        if (ini_get('session.use_cookies') && !headers_sent()) {
             $p = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $p['path'], '', (bool)$p['secure'], (bool)$p['httponly']);
+            setcookie(session_name(), '', [
+                'expires' => time() - 42000,
+                'path' => $p['path'] ?? '/',
+                'httponly' => (bool)($p['httponly'] ?? true),
+                'secure' => (bool)($p['secure'] ?? false),
+                'samesite' => 'Lax',
+            ]);
         }
-        session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) session_destroy();
     }
 }

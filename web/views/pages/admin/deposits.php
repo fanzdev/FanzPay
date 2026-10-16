@@ -7,7 +7,7 @@ require_once fp_base_path('views/partials/icons.php');
 <?php if (!empty($ok)): ?><div class="alert ok"><?= e($ok) ?></div><?php endif; ?>
 <?php if (!empty($error)): ?><div class="alert err"><?= e($error) ?></div><?php endif; ?>
 <div class="panel">
-  <form method="get" action="<?= url('admin/deposit') ?>" style="display:flex;gap:8px;flex-wrap:wrap">
+  <form method="get" action="<?= url($panel . '/deposit') ?>" style="display:flex;gap:8px;flex-wrap:wrap">
     <input name="q" value="<?= e($q ?? '') ?>" placeholder="Cari referensi / nama / email" style="flex:2;min-width:200px">
     <select name="status"><option value="">Semua status</option>
       <?php foreach (['pending' => 'Menunggu', 'success' => 'Berhasil', 'expired' => 'Kedaluwarsa', 'failed' => 'Gagal'] as $k => $l): ?>
@@ -32,10 +32,10 @@ require_once fp_base_path('views/partials/icons.php');
       <td><small><?= e($d['expired_at'] ?? '-') ?></small><?php if (!empty($d['paid_at'])): ?><br><small>bayar <?= e($d['paid_at']) ?></small><?php endif; ?><?php if (!empty($d['credited_at'])): ?><br><small>kredit <?= e($d['credited_at']) ?></small><?php endif; ?></td>
       <td style="white-space:nowrap">
         <?php if (($d['status'] ?? '') === 'pending' && empty($d['is_mock'])): ?>
-          <form method="post" action="<?= url('admin/deposit/' . $d['reference_id'] . '/sync') ?>" style="display:inline"><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Sinkron</button></form>
+          <form method="post" action="<?= url($panel . '/deposit/' . $d['reference_id'] . '/sync') ?>" style="display:inline"><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Sinkron</button></form>
         <?php endif; ?>
         <?php if (($d['status'] ?? '') === 'pending' && !empty($d['is_mock'])): ?>
-          <form method="post" action="<?= url('admin/deposit/' . $d['reference_id'] . '/simulate') ?>" style="display:inline" data-confirm="Simulasi sukses untuk deposit MOCK ini? Saldo user bertambah."><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Simulasi sukses</button></form>
+          <form method="post" action="<?= url($panel . '/deposit/' . $d['reference_id'] . '/simulate') ?>" style="display:inline" data-confirm="Simulasi sukses untuk deposit MOCK ini? Saldo user bertambah."><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Simulasi sukses</button></form>
         <?php endif; ?>
       </td>
     </tr>
@@ -43,9 +43,9 @@ require_once fp_base_path('views/partials/icons.php');
 </table></div>
 <?php if (($pages ?? 1) > 1): ?>
   <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-    <?php if ($page > 1): ?><a class="btn btn-ghost btn-sm" href="<?= url('admin/deposit?q=' . urlencode($q ?? '') . '&status=' . urlencode($status ?? '') . '&page=' . ($page - 1)) ?>">← Sebelumnya</a><?php endif; ?>
+    <?php if ($page > 1): ?><a class="btn btn-ghost btn-sm" href="<?= url($panel . '/deposit?q=' . urlencode($q ?? '') . '&status=' . urlencode($status ?? '') . '&page=' . ($page - 1)) ?>">← Sebelumnya</a><?php endif; ?>
     <small style="color:var(--mut)">Halaman <?= $page ?> / <?= $pages ?></small>
-    <?php if ($page < $pages): ?><a class="btn btn-ghost btn-sm" href="<?= url('admin/deposit?q=' . urlencode($q ?? '') . '&status=' . urlencode($status ?? '') . '&page=' . ($page + 1)) ?>">Berikutnya →</a><?php endif; ?>
+    <?php if ($page < $pages): ?><a class="btn btn-ghost btn-sm" href="<?= url($panel . '/deposit?q=' . urlencode($q ?? '') . '&status=' . urlencode($status ?? '') . '&page=' . ($page + 1)) ?>">Berikutnya →</a><?php endif; ?>
   </div>
 <?php endif; ?>
 </div>

@@ -23,7 +23,7 @@ require_once fp_base_path('views/partials/icons.php');
         <td class="mono"><?= rupiah((int)($t['amount'] ?? $t['total'] ?? 0)) ?></td>
         <td class="mono"><?= rupiah((int)($t['total_amount'] ?? $t['total'] ?? 0)) ?></td>
         <td><small><?= e($t['created_at'] ?? '-') ?></small></td><td><small><?= e($t['expired_at'] ?? '-') ?></small></td>
-        <td><?php if (empty($t['is_mock'])): ?><form method="post" action="<?= url('admin/deposit/' . $t['reference_id'] . '/sync') ?>" style="display:inline"><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Cek ke Midtrans</button></form><?php else: ?><small style="color:var(--mut)">mock — pakai Simulasi di halaman Deposit</small><?php endif; ?></td></tr>
+        <td><?php if (empty($t['is_mock'])): ?><form method="post" action="<?= url($panel . '/deposit/' . $t['reference_id'] . '/sync') ?>" style="display:inline"><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Cek ke Midtrans</button></form><?php else: ?><small style="color:var(--mut)">mock — pakai Simulasi di halaman Deposit</small><?php endif; ?></td></tr>
     <?php endforeach; ?>
   </table></div>
   <p style="color:var(--mut);font-size:13px">Jangan kredit ulang manual dari halaman ini. Koreksi hanya via status resmi Midtrans (tombol di atas) atau mekanisme refund/adjustment tercatat.</p>
@@ -33,7 +33,7 @@ require_once fp_base_path('views/partials/icons.php');
   <?php if (empty($data['old_pending'])): ?><p style="color:var(--mut)">Bersih. Tidak ada transaksi menggantung.</p><?php endif; ?>
   <?php foreach ($data['old_pending'] as $t): ?>
     <div class="tx-row"><span class="tx-main"><b class="mono"><?= e($t['reference_id']) ?></b><small><?= e($t['kind']) ?> · <?= rupiah((int)$t['total']) ?> · <?= e($t['created_at']) ?></small></span>
-    <?php if ($t['kind'] === 'ppob'): ?><form method="post" action="<?= url('admin/rekonsiliasi/' . $t['reference_id'] . '/refund') ?>" data-confirm="Refund transaksi ini?"><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Refund</button></form><?php endif; ?></div>
+    <?php if ($t['kind'] === 'ppob'): ?><form method="post" action="<?= url($panel . '/rekonsiliasi/' . $t['reference_id'] . '/refund') ?>" data-confirm="Refund transaksi ini?"><?= \App\Core\CSRF::field() ?><button class="btn btn-ghost btn-sm" type="submit">Refund</button></form><?php endif; ?></div>
   <?php endforeach; ?>
 </div>
 <div class="panel"><h3>Webhook belum selesai</h3>

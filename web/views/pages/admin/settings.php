@@ -7,7 +7,7 @@ $active = array_filter(array_map('trim', explode(',', strtolower((string)($s['de
 <?php if (!empty($error)): ?><div class="alert err"><?= e($error) ?></div><?php endif; ?>
 <div class="panel">
   <h3>Pengaturan sistem (super admin)</h3>
-  <form method="post" action="<?= url('admin/pengaturan') ?>">
+  <form method="post" action="<?= url($panel . '/pengaturan') ?>">
     <?= \App\Core\CSRF::field() ?>
     <div class="grid2">
       <div class="field"><label>Nama situs</label><input name="site_name" value="<?= e($s['site_name'] ?? 'FanzPay') ?>"></div>

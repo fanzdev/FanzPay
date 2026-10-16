@@ -15,6 +15,8 @@
   <div class="field"><label for="password">Kata sandi</label>
     <div class="pass-wrap"><input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Masukkan kata sandi"><button type="button" class="pass-eye" data-peek="#password" aria-label="Tampilkan kata sandi"></button></div>
   </div>
+  <input type="hidden" name="remember" value="0">
+  <label class="remember-row"><input type="checkbox" name="remember" value="1" checked> Ingat saya di perangkat ini (tetap login 30 hari)</label>
   <button class="btn btn-primary btn-block btn-lg" type="submit">Masuk ke Akun <?= icon('arrowR', 17) ?></button>
 </form>
 <p class="auth-foot">Belum punya akun? <a href="<?= url('register') ?>"><strong>Daftar gratis.</strong></a></p>

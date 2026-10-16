@@ -24,7 +24,7 @@ require_once fp_base_path('views/partials/icons.php');
     <a href="<?= url('produk?cat=pln') ?>"><?= icon('zap') ?>PLN</a>
     <a href="<?= url('produk?cat=game') ?>"><?= icon('game') ?>Game</a>
   </div>
-  <div class="quick" style="margin-top:11px">
+  <div class="quick">
     <a href="<?= url('produk?cat=bpjs') ?>"><?= icon('shieldCheck') ?>BPJS</a>
     <a href="<?= url('produk?cat=emoney') ?>"><?= icon('wallet') ?>E-Money</a>
     <a href="<?= url('produk') ?>"><?= icon('grid') ?>Semua</a>
@@ -38,7 +38,7 @@ require_once fp_base_path('views/partials/icons.php');
     <div class="empty"><?= icon('inbox', 28) ?><p>Belum ada transaksi.<br><a href="<?= url('deposit') ?>">Deposit pertama</a> untuk memulai.</p></div>
   <?php else: ?>
     <?php foreach ($recent as $t): ?>
-      <a class="tx-row" href="<?= url('riwayat/' . $t['reference_id']) ?>" style="color:inherit">
+      <a class="tx-row" href="<?= url('riwayat/' . $t['reference_id']) ?>">
         <span class="tx-ic"><?= icon($t['kind'] === 'deposit' ? 'plus' : ($t['kind'] === 'transfer' ? 'swap' : ($t['kind'] === 'withdraw' ? 'card' : 'grid')), 18) ?></span>
         <span class="tx-main"><b><?= e(kind_label($t['kind']) . ' • ' . $t['reference_id']) ?></b><small><?= e(date('d M Y H:i', strtotime($t['created_at']))) ?></small></span>
         <span class="tx-amt"><?= rupiah((int)$t['total']) ?><small><?= status_badge($t['status']) ?></small></span>

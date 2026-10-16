@@ -21,7 +21,7 @@
 <div class="panel">
   <div class="dash-head"><span class="dash-ic"><?= icon('card', 22) ?></span><div><h3>Tujuan tersimpan</h3><p><?= count($dests) ?> tujuan · tambah baru di bawah.</p></div></div>
   <?php if (!empty($dests)): ?>
-  <div class="chips" style="margin-bottom:0">
+  <div class="chips chips-flat">
     <?php foreach ($dests as $d): ?><span class="chip"><?= icon('bank', 15) ?> <?= e($d['label'] . ' • ' . $d['bank_account']) ?></span><?php endforeach; ?>
   </div>
   <?php endif; ?>

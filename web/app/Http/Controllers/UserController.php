@@ -28,7 +28,7 @@ final class UserController {
     public function __construct() {
         $u = Auth::user();
         if (!$u) { redirect('login'); }
-        if ($u['role'] !== 'user') { redirect('admin'); }
+        if ($u['role'] !== 'user') { redirect(panel_home($u)); }
         $this->u = $u;
     }
 

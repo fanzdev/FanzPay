@@ -13,7 +13,7 @@ use App\Services\Settings;
 final class WebController {
     public function landing(): void {
         $u = Auth::user();
-        if ($u) { redirect($u['role'] === 'user' ? '' : 'admin'); }
+        if ($u) { redirect($u['role'] === 'user' ? '' : panel_home($u)); }
         // ANTI DATA DEMO: hanya tampilkan katalog REAL dari database/provider.
         // Jika katalog kosong (belum sync), tampilkan empty-state jujur — tanpa angka/nama palsu.
         $featured = [];
@@ -198,6 +198,15 @@ final class WebController {
         View::render('download', ['title' => 'Unduh Aplikasi Android FanzPay', 'apk' => $apk, 'meta_desc' => 'Unduh aplikasi Android resmi FanzPay (APK): deposit QRIS real-time, transfer gratis, beli pulsa, data, PLN, dan voucher game dalam satu aplikasi.'], 'public');
     }
 
+    /** GET /panduan-mcp — tutorial AI Agentic (MCP) nol → berhasil. */
+    public function mcpSetup(): void {
+        View::render('mcp-setup', [
+            'title' => 'FanzPay AI Agentic — Hubungkan Claude, ChatGPT & AI Lain via MCP',
+            'meta_desc' => 'FanzPay AI Agentic: hubungkan akun ke Claude, ChatGPT, Cursor, dan AI lain via MCP. Analisis saldo, riset PPOB, dan pembelian otomatis berbatas.',
+            'endpoint' => url('mcp'),
+        ], 'public');
+    }
+
     /** Sitemap XML dinamis untuk SEO. */
     public function sitemap(): void {
         $base = rtrim((string)config('app.url', url('')), '/');
@@ -215,6 +224,7 @@ final class WebController {
             ['loc' => $base . '/kebijakan-privasi', 'freq' => 'monthly', 'pr' => '0.4'],
             ['loc' => $base . '/kebijakan-refund', 'freq' => 'monthly', 'pr' => '0.4'],
             ['loc' => $base . '/download-apk', 'freq' => 'weekly', 'pr' => '0.8'],
+            ['loc' => $base . '/panduan-mcp', 'freq' => 'weekly', 'pr' => '0.8'],
         ];
         header('Content-Type: application/xml; charset=utf-8');
         echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -234,8 +244,12 @@ final class WebController {
             'User-agent: *',
             'Allow: /',
             'Disallow: /admin',
+            'Disallow: /superadmin',
             'Disallow: /api/',
             'Disallow: /webhooks/',
+            'Disallow: /mcp',
+            'Disallow: /mcp-koneksi',
+            'Disallow: /mcp-kebijakan',
             'Disallow: /home',
             'Disallow: /dashboard',
             'Disallow: /produk',

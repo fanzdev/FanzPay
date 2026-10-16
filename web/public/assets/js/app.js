@@ -22,7 +22,7 @@
         : '<svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg>';
     });
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', t === 'dark' ? '#070C1A' : '#F4F6FB');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#060B18' : '#F6F8FC');
   }
   applyTheme(currentTheme());
   document.addEventListener('click', function (ev) {
